@@ -8,8 +8,8 @@ from chatbot import get_advisor
 load_dotenv()
 
 app = Flask(__name__)
-app.config['DEBUG'] = os.getenv('FLASK_DEBUG', True)
-app.config['HOST'] = os.getenv('HOST', '127.0.0.1')
+app.config['DEBUG'] = os.getenv('FLASK_DEBUG', False)
+app.config['HOST'] = os.getenv('HOST', '0.0.0.0')
 app.config['PORT'] = int(os.getenv('PORT', 5000))
 
 PORTFOLIO = {
@@ -174,5 +174,6 @@ def get_financial_tip():
         return jsonify({"success": False, "message": str(e)}), 500
 
 if __name__ == '__main__':
+    host = os.getenv('HOST', '0.0.0.0')
     port = int(os.getenv('PORT', 5000))
-    app.run(debug=True, port=port)
+    app.run(debug=False, host=host, port=port)
