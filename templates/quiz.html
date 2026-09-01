@@ -22,32 +22,32 @@
         }
     })();
 </script>
-<body class="min-h-screen flex bg-slate-950 text-slate-100">
+<body class="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 overflow-x-hidden">
 
     <div id="sidebar-container"></div>
 
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto w-full space-y-6 max-w-7xl mx-auto">
         
         <!-- Header & Stats Bar -->
-        <div class="flex flex-wrap justify-between items-center border-b border-white/10 pb-4 gap-4">
+        <div class="flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center border-b border-white/10 pb-4 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                <h1 class="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                     🎯 Financial Literacy Modules
                 </h1>
                 <p class="text-slate-400 text-xs mt-0.5">Master bite-sized financial lessons, complete 10-question quizzes, earn XP, and unlock badges!</p>
             </div>
 
             <!-- Gamification XP & Badges Counter -->
-            <div class="flex items-center gap-3">
-                <div class="liquid-glass px-4 py-2 rounded-xl border border-sky-400/30 flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+                <div class="liquid-glass px-3 md:px-4 py-2 rounded-xl border border-sky-400/30 flex items-center gap-2 w-full sm:w-auto">
                     <span class="text-lg">⚡</span>
                     <div>
-                        <span class="text-[10px] uppercase font-extrabold text-slate-400 block leading-tight">Total XP</span>
-                        <strong id="user-xp" class="text-sky-400 font-black text-sm">0 XP</strong>
+                        <span class="text-[10px] uppercase font-extrabold text-slate-400 block leading-tight\">Total XP</span>
+                        <strong id="user-xp\" class=\"text-sky-400 font-black text-sm\">0 XP</strong>
                     </div>
                 </div>
-                <div class="liquid-glass px-4 py-2 rounded-xl border border-emerald-400/30 flex items-center gap-2">
-                    <span class="text-lg">🏆</span>
+                <div class=\"liquid-glass px-3 md:px-4 py-2 rounded-xl border border-emerald-400/30 flex items-center gap-2 w-full sm:w-auto\">
+                    <span class=\"text-lg\">🏆</span>
                     <div>
                         <span class="text-[10px] uppercase font-extrabold text-slate-400 block leading-tight">Badges Unlocked</span>
                         <strong id="unlocked-badge-count" class="text-emerald-400 font-black text-sm">0 / 7</strong>

@@ -22,24 +22,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="min-h-screen flex bg-slate-950 text-slate-100">
+<body class="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 overflow-x-hidden">
 
     <div id="sidebar-container"></div>
 
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-5xl mx-auto">
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto w-full space-y-6 max-w-5xl mx-auto">
         
         <!-- Header -->
-        <div class="flex justify-between items-center w-full">
+        <div class="flex flex-col gap-2 md:flex-row md:justify-between md:items-center w-full">
             <div>
-                <h1 class="text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                <h1 class="text-xl md:text-3xl font-black text-white tracking-tight flex items-center gap-2">
                     🤖 AI Financial Tutor
                 </h1>
-                <p class="text-slate-300 text-sm mt-1">Personalized financial insights powered by Groq (LLaMA 3.3 70B).</p>
+                <p class="text-slate-300 text-xs md:text-sm mt-1">Personalized financial insights powered by Groq (LLaMA 3.3 70B).</p>
             </div>
         </div>
 
         <!-- AI Tutor Interface -->
-        <div class="liquid-glass p-6 flex flex-col justify-between h-[650px] rounded-2xl relative">
+        <div class="liquid-glass p-4 md:p-6 flex flex-col justify-between h-[500px] md:h-[650px] rounded-2xl relative">
             <div class="border-b border-white/10 pb-3 mb-4 flex justify-between items-center">
                 <h2 class="text-base font-bold text-white flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span> Groq-Powered AI Mentor
@@ -61,7 +61,7 @@
             </div>
 
             <!-- Input Bar Form with Gemini-Style '+' Button -->
-            <form id="chat-form" onsubmit="handleChatSubmit(event)" class="relative flex items-center gap-2">
+            <form id="chat-form" onsubmit="handleChatSubmit(event)" class="relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 
                 <!-- Hidden Input Elements -->
                 <input type="file" id="file-input" class="hidden" onchange="handleFileSelected(event)">
@@ -85,8 +85,8 @@
                     +
                 </button>
 
-                <input type="text" id="chat-input" placeholder="Ask your personalized financial question..." required class="liquid-input flex-1 rounded-xl px-4 py-3 text-sm font-semibold">
-                <button type="submit" class="liquid-btn-primary px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shrink-0">Ask AI</button>
+                <input type="text" id="chat-input" placeholder="Ask your personalized financial question..." required class="liquid-input flex-1 rounded-xl px-4 py-3 text-sm font-semibold min-h-12">
+                <button type="submit" class="liquid-btn-primary px-4 sm:px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shrink-0 w-full sm:w-auto">Ask AI</button>
             </form>
         </div>
 

@@ -22,18 +22,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="min-h-screen flex bg-slate-950 text-slate-100">
+<body class="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 overflow-x-hidden">
 
     <!-- Sidebar Mounting Point -->
     <div id="sidebar-container"></div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto w-full space-y-6 max-w-7xl mx-auto">
         
         <!-- Header -->
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
+        <div class="flex flex-col gap-4 md:flex-row md:justify-between md:items-center border-b border-white/10 pb-4">
             <div>
-                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                <h1 class="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
                     📊 Interactive 50/30/20 Budget Allocator
                 </h1>
                 <p class="text-slate-400 text-xs mt-0.5">Categorize your items into Needs, Wants, and Savings to track your target allocations.</p>
@@ -41,12 +41,12 @@
         </div>
 
         <!-- Income Setup Bar -->
-        <div class="liquid-glass p-6 rounded-2xl flex flex-wrap items-center justify-between gap-4">
-            <div class="space-y-1">
+        <div class="liquid-glass p-4 md:p-6 rounded-2xl flex flex-col md:flex-row md:flex-wrap items-start md:items-center justify-between gap-4">
+            <div class="space-y-1 w-full md:w-auto">
                 <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400">Monthly Net Income ($)</label>
                 <div class="flex items-center gap-2">
                     <span class="text-lg font-black text-sky-400">$</span>
-                    <input type="number" id="monthly-income" value="4000" step="100" min="0" onchange="calculateBudget()" class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-bold w-44 focus:outline-none focus:border-sky-400">
+                    <input type="number" id="monthly-income" value="4000" step="100" min="0" onchange="calculateBudget()" class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-bold w-full md:w-44 focus:outline-none focus:border-sky-400">
                 </div>
             </div>
 
