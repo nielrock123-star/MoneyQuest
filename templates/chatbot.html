@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head><script>
+    (function() {
+        const savedTheme = localStorage.getItem('mq_theme') || 'dark';
+        const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.style.setProperty('--accent-color', savedAccent);
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedAccent);
+        if (result) {
+            const r = parseInt(result[1], 16), g = parseInt(result[2], 16), b = parseInt(result[3], 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            document.documentElement.style.setProperty('--accent-text', yiq >= 128 ? '#020617' : '#ffffff');
+        }
+    })();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyQuest.AI - AI Tutor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen flex bg-slate-950 text-slate-100">
+
+    <div id="sidebar-container"></div>
+
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-5xl mx-auto">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center w-full">
+            <div>
+                <h1 class="text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                    🤖 AI Financial Tutor
+                </h1>
+                <p class="text-slate-300 text-sm mt-1">Personalized financial insights powered by Groq (LLaMA 3.3 70B).</p>
+            </div>
+        </div>
+
+        <!-- AI Tutor Interface -->
+        <div class="liquid-glass p-6 flex flex-col justify-between h-[650px] rounded-2xl relative">
+            <div class="border-b border-white/10 pb-3 mb-4 flex justify-between items-center">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span> Groq-Powered AI Mentor
+                </h2>
+                <span class="text-[10px] text-sky-400 font-extrabold uppercase bg-sky-500/10 px-2.5 py-1 rounded-md border border-sky-400/20">Personalized Mode</span>
+            </div>
+
+            <!-- Chat Log -->
+            <div id="chat-box" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-4 text-xs md:text-sm">
+                <div class="bg-sky-500/10 border border-sky-400/20 p-4 rounded-xl text-slate-200">
+                    👋 Welcome to MoneyQuest AI! Ask me anything about stock options, risk management, budget allocation, or debt strategy.
+                </div>
+            </div>
+
+            <!-- Selected File Badge Indicator -->
+            <div id="attached-file-badge" class="hidden mb-2 p-2 rounded-xl bg-white/10 border border-sky-400/30 text-xs text-sky-300 flex items-center justify-between w-fit gap-3">
+                <span id="attached-file-name" class="font-bold"></span>
+                <button type="button" onclick="clearAttachment()" class="text-rose-400 hover:text-rose-300 font-bold">✕</button>
+            </div>
+
+            <!-- Input Bar Form with Gemini-Style '+' Button -->
+            <form id="chat-form" onsubmit="handleChatSubmit(event)" class="relative flex items-center gap-2">
+                
+                <!-- Hidden Input Elements -->
+                <input type="file" id="file-input" class="hidden" onchange="handleFileSelected(event)">
+                <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelected(event)">
+
+                <!-- Attachment Popover Menu -->
+                <div id="attach-menu" class="hidden absolute bottom-16 left-0 bg-slate-900/95 border border-white/10 rounded-2xl p-2 shadow-2xl backdrop-blur-xl space-y-1 w-48 z-50">
+                    <button type="button" onclick="triggerFileInput()" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-white/10 transition">
+                        <span>📁</span> Upload Files
+                    </button>
+                    <button type="button" onclick="triggerCameraInput()" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-white/10 transition">
+                        <span>📷</span> Camera
+                    </button>
+                    <button type="button" onclick="triggerDriveInput()" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-white/10 transition">
+                        <span>☁️</span> Add from Drive
+                    </button>
+                </div>
+
+                <!-- '+' Plus Toggle Button -->
+                <button type="button" onclick="toggleAttachMenu()" class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black text-xl text-slate-300 hover:text-white transition flex items-center justify-center shrink-0">
+                    +
+                </button>
+
+                <input type="text" id="chat-input" placeholder="Ask your personalized financial question..." required class="liquid-input flex-1 rounded-xl px-4 py-3 text-sm font-semibold">
+                <button type="submit" class="liquid-btn-primary px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shrink-0">Ask AI</button>
+            </form>
+        </div>
+
+    </main>
+
+    <script src="/static/sidebar.js"></script>
+    <script>
+        let attachedFile = null;
+
+        function toggleAttachMenu() {
+            const menu = document.getElementById("attach-menu");
+            menu.classList.toggle("hidden");
+        }
+
+        // Close attachment menu on outside click
+        document.addEventListener("click", (e) => {
+            const menu = document.getElementById("attach-menu");
+            const btn = e.target.closest("button");
+            if (!menu.contains(e.target) && (!btn || btn.innerText !== "+")) {
+                menu.classList.add("hidden");
+            }
+        });
+
+        function triggerFileInput() {
+            document.getElementById("attach-menu").classList.add("hidden");
+            document.getElementById("file-input").click();
+        }
+
+        function triggerCameraInput() {
+            document.getElementById("attach-menu").classList.add("hidden");
+            document.getElementById("camera-input").click();
+        }
+
+        function triggerDriveInput() {
+            document.getElementById("attach-menu").classList.add("hidden");
+            alert("Google Drive Integration: Syncing with Google Picker API...");
+        }
+
+        function handleFileSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                attachedFile = file;
+                document.getElementById("attached-file-name").innerText = `📎 ${file.name}`;
+                document.getElementById("attached-file-badge").classList.remove("hidden");
+            }
+        }
+
+        function clearAttachment() {
+            attachedFile = null;
+            document.getElementById("file-input").value = "";
+            document.getElementById("camera-input").value = "";
+            document.getElementById("attached-file-badge").classList.add("hidden");
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputEl = document.getElementById("chat-input");
+            const boxEl = document.getElementById("chat-box");
+            const query = inputEl.value.trim();
+
+            if (!query) return;
+
+            let fileNote = attachedFile ? `<div class="text-[10px] text-sky-300 font-semibold pt-1">Attached: ${attachedFile.name}</div>` : '';
+
+            boxEl.innerHTML += `
+                <div class="bg-white/10 p-3.5 rounded-xl text-white ml-auto max-w-[80%] font-medium">
+                    ${query}
+                    ${fileNote}
+                </div>
+            `;
+            
+            inputEl.value = "";
+            clearAttachment();
+            boxEl.scrollTop = boxEl.scrollHeight;
+
+            const loadingId = "msg-" + Date.now();
+            boxEl.innerHTML += `
+                <div id="${loadingId}" class="bg-sky-500/10 border border-sky-400/20 p-3.5 rounded-xl text-slate-300 mr-auto max-w-[80%] italic">
+                    🤖 AI Advisor is processing your request...
+                </div>
+            `;
+            boxEl.scrollTop = boxEl.scrollHeight;
+
+            try {
+                const res = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: query })
+                });
+                const data = await res.json();
+                
+                const targetEl = document.getElementById(loadingId);
+                if (data.success) {
+                    targetEl.classList.remove("italic");
+                    targetEl.innerText = data.response;
+                } else {
+                    targetEl.innerText = data.message || "An error occurred generating response.";
+                }
+            } catch (err) {
+                const targetEl = document.getElementById(loadingId);
+                targetEl.innerText = "Error connecting to Groq AI Advisor service.";
+            }
+            boxEl.scrollTop = boxEl.scrollHeight;
+        }
+
+        // Add financial tip button functionality
+        async function getFinancialTip() {
+            const boxEl = document.getElementById("chat-box");
+            const loadingId = "tip-" + Date.now();
+            
+            boxEl.innerHTML += `
+                <div id="${loadingId}" class="bg-sky-500/10 border border-sky-400/20 p-3.5 rounded-xl text-slate-300 mr-auto max-w-[80%] italic">
+                    💡 Getting a financial tip...
+                </div>
+            `;
+            boxEl.scrollTop = boxEl.scrollHeight;
+
+            try {
+                const res = await fetch("/api/chat/tip", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                
+                const targetEl = document.getElementById(loadingId);
+                if (data.success) {
+                    targetEl.classList.remove("italic");
+                    targetEl.innerHTML = `💰 <strong>Financial Tip:</strong> ${data.tip}`;
+                } else {
+                    targetEl.innerText = data.message || "Unable to fetch tip.";
+                }
+            } catch (err) {
+                const targetEl = document.getElementById(loadingId);
+                targetEl.innerText = "Error fetching financial tip.";
+            }
+            boxEl.scrollTop = boxEl.scrollHeight;
+        }
+
+        // Add reset button functionality
+        async function resetChat() {
+            if (!confirm("Are you sure you want to clear the conversation history?")) return;
+            
+            try {
+                const res = await fetch("/api/chat/reset", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    const boxEl = document.getElementById("chat-box");
+                    boxEl.innerHTML = `
+                        <div class="bg-sky-500/10 border border-sky-400/20 p-4 rounded-xl text-slate-200">
+                            👋 Conversation reset! Welcome back to MoneyQuest AI! Ask me anything about stock options, risk management, budget allocation, or debt strategy.
+                        </div>
+                    `;
+                } else {
+                    alert("Failed to reset conversation: " + data.message);
+                }
+            } catch (err) {
+                alert("Error resetting conversation.");
+            }
+        }
+    </script>
+</body>
+</html>

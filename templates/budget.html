@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head><script>
+    (function() {
+        const savedTheme = localStorage.getItem('mq_theme') || 'dark';
+        const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.style.setProperty('--accent-color', savedAccent);
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedAccent);
+        if (result) {
+            const r = parseInt(result[1], 16), g = parseInt(result[2], 16), b = parseInt(result[3], 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            document.documentElement.style.setProperty('--accent-text', yiq >= 128 ? '#020617' : '#ffffff');
+        }
+    })();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyQuest.AI - Budget Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen flex bg-slate-950 text-slate-100">
+
+    <!-- Sidebar Mounting Point -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-white/10 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                    📊 Interactive 50/30/20 Budget Allocator
+                </h1>
+                <p class="text-slate-400 text-xs mt-0.5">Categorize your items into Needs, Wants, and Savings to track your target allocations.</p>
+            </div>
+        </div>
+
+        <!-- Income Setup Bar -->
+        <div class="liquid-glass p-6 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-1">
+                <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-400">Monthly Net Income ($)</label>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg font-black text-sky-400">$</span>
+                    <input type="number" id="monthly-income" value="4000" step="100" min="0" onchange="calculateBudget()" class="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-bold w-44 focus:outline-none focus:border-sky-400">
+                </div>
+            </div>
+
+            <!-- Allocation Summary Badges -->
+            <div class="flex flex-wrap gap-3 text-xs font-bold">
+                <div class="px-4 py-2 rounded-xl bg-sky-500/10 border border-sky-400/30 text-sky-300">
+                    <span class="block text-[10px] uppercase font-extrabold text-slate-400">Needs Target (50%)</span>
+                    <strong id="target-needs" class="text-sm font-black">$2,000.00</strong>
+                </div>
+                <div class="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-400/30 text-purple-300">
+                    <span class="block text-[10px] uppercase font-extrabold text-slate-400">Wants Target (30%)</span>
+                    <strong id="target-wants" class="text-sm font-black">$1,200.00</strong>
+                </div>
+                <div class="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-400/30 text-emerald-300">
+                    <span class="block text-[10px] uppercase font-extrabold text-slate-400">Savings Target (20%)</span>
+                    <strong id="target-savings" class="text-sm font-black">$800.00</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Add Item Form -->
+            <div class="liquid-glass p-6 rounded-2xl space-y-4 h-fit">
+                <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-white/10 pb-2">Add New Expense or Goal</h2>
+                <form id="item-form" onsubmit="addItem(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Item Name</label>
+                        <input type="text" id="item-name" placeholder="e.g. Groceries, PS5, Milk, Roth IRA" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Bucket Category</label>
+                        <select id="item-category" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                            <option value="Needs">Needs (50%)</option>
+                            <option value="Wants">Wants (30%)</option>
+                            <option value="Savings">Savings (20%)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Monthly Cost / Allocation ($)</label>
+                        <input type="number" id="item-cost" step="0.01" min="0" placeholder="150.00" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                    </div>
+                    <button type="submit" class="w-full liquid-btn-primary py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">
+                        + Add Item
+                    </button>
+                </form>
+            </div>
+
+            <!-- Bucket Breakdown Column -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Needs Column -->
+                <div class="liquid-glass p-5 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">🏠</span>
+                            <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400">Needs (50%)</h2>
+                        </div>
+                        <span id="total-needs" class="text-xs font-black text-white">$0.00 / $0.00</span>
+                    </div>
+                    <div id="list-Needs" class="space-y-2">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+                <!-- Wants Column -->
+                <div class="liquid-glass p-5 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">🎮</span>
+                            <h2 class="text-xs font-extrabold uppercase tracking-wider text-purple-400">Wants (30%)</h2>
+                        </div>
+                        <span id="total-wants" class="text-xs font-black text-white">$0.00 / $0.00</span>
+                    </div>
+                    <div id="list-Wants" class="space-y-2">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+                <!-- Savings Column -->
+                <div class="liquid-glass p-5 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">💰</span>
+                            <h2 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Savings (20%)</h2>
+                        </div>
+                        <span id="total-savings" class="text-xs font-black text-white">$0.00 / $0.00</span>
+                    </div>
+                    <div id="list-Savings" class="space-y-2">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/static/sidebar.js"></script>
+    <script>
+        // Sample starter data with common items like milk, groceries, PS5
+        let items = JSON.parse(localStorage.getItem('mq_budget_items')) || [
+            { id: 1, name: "Groceries & Milk", category: "Needs", cost: 450.00 },
+            { id: 2, name: "Rent & Utilities", category: "Needs", cost: 1200.00 },
+            { id: 3, name: "PS5 Console & Games", category: "Wants", cost: 150.00 },
+            { id: 4, name: "Emergency Fund", category: "Savings", cost: 500.00 }
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            calculateBudget();
+        });
+
+        function addItem(e) {
+            e.preventDefault();
+            const name = document.getElementById('item-name').value;
+            const category = document.getElementById('item-category').value;
+            const cost = parseFloat(document.getElementById('item-cost').value);
+
+            items.push({ id: Date.now(), name, category, cost });
+            localStorage.setItem('mq_budget_items', JSON.stringify(items));
+
+            document.getElementById('item-form').reset();
+            calculateBudget();
+        }
+
+        function removeItem(id) {
+            items = items.filter(i => i.id !== id);
+            localStorage.setItem('mq_budget_items', JSON.stringify(items));
+            calculateBudget();
+        }
+
+        function calculateBudget() {
+            const income = parseFloat(document.getElementById('monthly-income').value) || 0;
+
+            const targetNeeds = income * 0.50;
+            const targetWants = income * 0.30;
+            const targetSavings = income * 0.20;
+
+            document.getElementById('target-needs').innerText = `$${targetNeeds.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('target-wants').innerText = `$${targetWants.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('target-savings').innerText = `$${targetSavings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            ['Needs', 'Wants', 'Savings'].forEach(cat => {
+                const listEl = document.getElementById(`list-${cat}`);
+                const catItems = items.filter(i => i.category === cat);
+                const sum = catItems.reduce((acc, i) => acc + i.cost, 0);
+
+                let target = cat === 'Needs' ? targetNeeds : (cat === 'Wants' ? targetWants : targetSavings);
+                const isOver = sum > target;
+
+                document.getElementById(`total-${cat.toLowerCase()}`).innerText = `$${sum.toLocaleString('en-US', { minimumFractionDigits: 2 })} / $${target.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                document.getElementById(`total-${cat.toLowerCase()}`).className = `text-xs font-black ${isOver ? 'text-rose-400' : 'text-emerald-400'}`;
+
+                if (catItems.length === 0) {
+                    listEl.innerHTML = `<p class="text-xs text-slate-500 py-2 italic">No ${cat.toLowerCase()} items added yet.</p>`;
+                } else {
+                    listEl.innerHTML = catItems.map(item => `
+                        <div class="p-3 rounded-xl bg-black/40 border border-white/5 flex justify-between items-center text-xs">
+                            <span class="font-bold text-white">${item.name}</span>
+                            <div class="flex items-center gap-3">
+                                <span class="font-extrabold text-slate-200">$${item.cost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                                <button onclick="removeItem(${item.id})" class="text-rose-400 hover:text-rose-300 px-2 py-0.5 rounded-lg bg-rose-500/10">✕</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

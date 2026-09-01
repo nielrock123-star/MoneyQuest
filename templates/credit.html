@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyQuest.AI - Debt Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head><script>
+    (function() {
+        const savedTheme = localStorage.getItem('mq_theme') || 'dark';
+        const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.style.setProperty('--accent-color', savedAccent);
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedAccent);
+        if (result) {
+            const r = parseInt(result[1], 16), g = parseInt(result[2], 16), b = parseInt(result[3], 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            document.documentElement.style.setProperty('--accent-text', yiq >= 128 ? '#020617' : '#ffffff');
+        }
+    })();
+</script>
+<body class="min-h-screen flex bg-slate-950 text-slate-100">
+
+    <!-- Sidebar Mounting Point -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-white/10 pb-4">
+            <div>
+                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                    💳 Debt Engine, EMI & Repayment Simulator
+                </h1>
+                <p class="text-slate-400 text-xs mt-0.5">Calculate loan EMIs, analyze interest costs, and compare Avalanche vs. Snowball payoff strategies.</p>
+            </div>
+        </div>
+
+        <!-- EMI Loan Calculator & Output Banner -->
+        <div class="liquid-glass p-6 rounded-2xl space-y-4 border border-sky-500/20">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 border-b border-white/10 pb-2 flex items-center gap-2">
+                🧮 EMI (Equated Monthly Installment) Calculator
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Loan Amount ($)</label>
+                    <input type="number" id="emi-principal" value="25000" step="100" oninput="calculateEMI()" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Annual Interest Rate (APR %)</label>
+                    <input type="number" id="emi-rate" value="8.5" step="0.1" oninput="calculateEMI()" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Loan Tenure (Years)</label>
+                    <input type="number" id="emi-tenure" value="5" step="0.5" oninput="calculateEMI()" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                </div>
+                <button onclick="addEmiToDebts()" class="liquid-btn-primary py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider h-[38px]">
+                    + Add EMI to Debts
+                </button>
+            </div>
+
+            <!-- EMI Output Breakdown -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <div class="p-3 rounded-xl bg-black/30 border border-white/5">
+                    <span class="block text-[10px] uppercase font-bold text-slate-400">Monthly EMI</span>
+                    <strong id="emi-monthly-result" class="text-base font-black text-sky-400">$0.00</strong>
+                </div>
+                <div class="p-3 rounded-xl bg-black/30 border border-white/5">
+                    <span class="block text-[10px] uppercase font-bold text-slate-400">Total Interest Payable</span>
+                    <strong id="emi-interest-result" class="text-base font-black text-rose-400">$0.00</strong>
+                </div>
+                <div class="p-3 rounded-xl bg-black/30 border border-white/5">
+                    <span class="block text-[10px] uppercase font-bold text-slate-400">Total Payment Amount</span>
+                    <strong id="emi-total-result" class="text-base font-black text-emerald-400">$0.00</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debt Calculator & Overview Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Input Form -->
+            <div class="liquid-glass p-6 rounded-2xl space-y-4">
+                <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-white/10 pb-2">Add Debt Instrument</h2>
+                <form id="debt-form" onsubmit="addDebt(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Debt Name</label>
+                        <input type="text" id="debt-name" placeholder="e.g. Credit Card A" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Current Balance ($)</label>
+                        <input type="number" id="debt-balance" step="0.01" placeholder="5000" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Interest Rate (APR %)</label>
+                        <input type="number" id="debt-rate" step="0.1" placeholder="19.99" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Minimum Payment ($)</label>
+                        <input type="number" id="debt-min" step="0.01" placeholder="120" required class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400">
+                    </div>
+                    <button type="submit" class="w-full liquid-btn-primary py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">
+                        + Add Debt to Strategy
+                    </button>
+                </form>
+            </div>
+
+            <!-- Active Debts List -->
+            <div class="lg:col-span-2 liquid-glass p-6 rounded-2xl space-y-4">
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Active Debts Overview</h2>
+                    <span id="total-debt-sum" class="text-xs font-black text-rose-400">Total Debt: $0.00</span>
+                </div>
+                <div id="debt-list" class="space-y-3 max-h-80 overflow-y-auto">
+                    <p class="text-xs text-slate-500 text-center py-8">No debts added yet. Use the forms above to start simulating.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategy Repayment Comparison -->
+        <div class="liquid-glass p-6 rounded-2xl space-y-4">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-white/10 pb-2">Strategy Breakdown</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-black/30 border border-white/5 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🏔️</span>
+                        <h3 class="text-sm font-black text-white">Debt Avalanche</h3>
+                    </div>
+                    <p class="text-xs text-slate-400">Prioritizes debts with the highest interest rates (APR) first. Minimizes long-term interest charges.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-black/30 border border-white/5 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">⛄</span>
+                        <h3 class="text-sm font-black text-white">Debt Snowball</h3>
+                    </div>
+                    <p class="text-xs text-slate-400">Prioritizes debts with the lowest balances first. Maximizes quick wins and psychological momentum.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/static/sidebar.js"></script>
+    <script>
+        let debts = JSON.parse(localStorage.getItem('mq_debts')) || [];
+        let currentEmiValue = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            calculateEMI();
+            renderDebts();
+        });
+
+        function calculateEMI() {
+            const P = parseFloat(document.getElementById('emi-principal').value) || 0;
+            const annualRate = parseFloat(document.getElementById('emi-rate').value) || 0;
+            const years = parseFloat(document.getElementById('emi-tenure').value) || 0;
+
+            if (P <= 0 || annualRate <= 0 || years <= 0) {
+                document.getElementById('emi-monthly-result').innerText = "$0.00";
+                document.getElementById('emi-interest-result').innerText = "$0.00";
+                document.getElementById('emi-total-result').innerText = "$0.00";
+                currentEmiValue = 0;
+                return;
+            }
+
+            const r = (annualRate / 12) / 100;
+            const n = years * 12;
+
+            const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const totalPayment = emi * n;
+            const totalInterest = totalPayment - P;
+
+            currentEmiValue = emi;
+
+            document.getElementById('emi-monthly-result').innerText = `$${emi.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('emi-interest-result').innerText = `$${totalInterest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('emi-total-result').innerText = `$${totalPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function addEmiToDebts() {
+            const P = parseFloat(document.getElementById('emi-principal').value) || 0;
+            const annualRate = parseFloat(document.getElementById('emi-rate').value) || 0;
+
+            if (P <= 0 || currentEmiValue <= 0) return;
+
+            debts.push({
+                id: Date.now(),
+                name: `Fixed Loan EMI (${document.getElementById('emi-tenure').value} yrs)`,
+                balance: P,
+                rate: annualRate,
+                min: parseFloat(currentEmiValue.toFixed(2))
+            });
+
+            localStorage.setItem('mq_debts', JSON.stringify(debts));
+            renderDebts();
+        }
+
+        function addDebt(e) {
+            e.preventDefault();
+            const name = document.getElementById('debt-name').value;
+            const balance = parseFloat(document.getElementById('debt-balance').value);
+            const rate = parseFloat(document.getElementById('debt-rate').value);
+            const min = parseFloat(document.getElementById('debt-min').value);
+
+            debts.push({ id: Date.now(), name, balance, rate, min });
+            localStorage.setItem('mq_debts', JSON.stringify(debts));
+            
+            document.getElementById('debt-form').reset();
+            renderDebts();
+        }
+
+        function removeDebt(id) {
+            debts = debts.filter(d => d.id !== id);
+            localStorage.setItem('mq_debts', JSON.stringify(debts));
+            renderDebts();
+        }
+
+        function renderDebts() {
+            const list = document.getElementById('debt-list');
+            const totalSum = document.getElementById('total-debt-sum');
+
+            if (debts.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">No debts added yet. Use the forms above to start simulating.</p>`;
+                totalSum.innerText = "Total Debt: $0.00";
+                return;
+            }
+
+            const grandTotal = debts.reduce((sum, d) => sum + d.balance, 0);
+            totalSum.innerText = `Total Debt: $${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            list.innerHTML = debts.map(d => `
+                <div class="p-3 rounded-xl bg-black/40 border border-white/5 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xs font-black text-white">${d.name}</h3>
+                        <p class="text-[10px] text-slate-400">APR: <span class="text-rose-400 font-bold">${d.rate}%</span> | Monthly Payment: <span class="text-sky-400 font-bold">$${d.min}/mo</span></p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-black text-white">$${d.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        <button onclick="removeDebt(${d.id})" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

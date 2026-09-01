@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head><script>
+    (function() {
+        const savedTheme = localStorage.getItem('mq_theme') || 'dark';
+        const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.style.setProperty('--accent-color', savedAccent);
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedAccent);
+        if (result) {
+            const r = parseInt(result[1], 16), g = parseInt(result[2], 16), b = parseInt(result[3], 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            document.documentElement.style.setProperty('--accent-text', yiq >= 128 ? '#020617' : '#ffffff');
+        }
+    })();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyQuest.AI - Market Terminal & Virtual Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen flex bg-slate-950 text-slate-100">
+
+    <div id="sidebar-container"></div>
+
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
+        
+        <!-- Header & Top Navigation -->
+        <div class="flex flex-wrap justify-between items-center w-full border-b border-white/10 pb-4 gap-4">
+            <div class="flex items-center gap-4">
+                <a href="/" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-white transition flex items-center gap-2">
+                    ← Back to Landing
+                </a>
+                <div>
+                    <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                        📈 Market Terminal & Simulator
+                    </h1>
+                    <p class="text-slate-400 text-xs mt-0.5">Real-time market feeds, TradingView charts & interactive paper trading</p>
+                </div>
+            </div>
+
+            <!-- Ticker Search Bar -->
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <input type="text" id="ticker-input" placeholder="Enter Ticker (e.g. AAPL, TSLA)" 
+                    class="bg-black/30 border border-white/10 rounded-xl px-4 py-2 text-xs font-semibold uppercase text-white focus:outline-none focus:border-sky-400 w-full sm:w-48">
+                <button onclick="fetchStockData()" class="liquid-btn-primary px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider">
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Terminal Upper Workspace: Stock Data & Live TradingView Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Stock Metrics & Embedded TradingView Chart -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Live Stock Fundamentals -->
+                <div class="liquid-glass p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span id="stock-symbol" class="text-xs font-extrabold uppercase tracking-widest text-sky-400">AAPL</span>
+                            <h2 id="stock-name" class="text-2xl font-black text-white">Apple Inc.</h2>
+                        </div>
+                        <div class="text-right">
+                            <div id="stock-price" class="text-2xl font-black text-white">$0.00</div>
+                            <div id="stock-change" class="text-xs font-bold text-emerald-400">+0.00 (0.00%)</div>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10 text-xs">
+                        <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                            <span class="text-slate-400 block font-medium">Market Cap</span>
+                            <strong id="stat-mcap" class="text-white font-bold text-sm">--</strong>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                            <span class="text-slate-400 block font-medium">P/E Ratio</span>
+                            <strong id="stat-pe" class="text-white font-bold text-sm">--</strong>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                            <span class="text-slate-400 block font-medium">52-Wk High</span>
+                            <strong id="stat-high" class="text-white font-bold text-sm">--</strong>
+                        </div>
+                        <div class="bg-black/20 p-3 rounded-xl border border-white/5">
+                            <span class="text-slate-400 block font-medium">52-Wk Low</span>
+                            <strong id="stat-low" class="text-white font-bold text-sm">--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TradingView Chart Widget -->
+                <div class="liquid-glass p-4 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 px-2">TradingView Interactive Chart</h3>
+                    <div id="tradingview_chart_container" class="h-96 w-full rounded-xl overflow-hidden"></div>
+                </div>
+
+            </div>
+
+            <!-- Trade Order Execution Desk -->
+            <div class="space-y-6">
+                
+                <div class="liquid-glass p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400">Order Execution Desk</h3>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-400/20 px-2 py-0.5 rounded font-bold uppercase">Paper Trading</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Target Asset</label>
+                            <input type="text" id="trade-symbol" readonly class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm font-bold uppercase text-sky-400 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Quantity (Shares)</label>
+                            <input type="number" id="trade-shares" value="1" min="1" oninput="calculateEstimatedTotal()" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-white focus:outline-none focus:border-sky-400">
+                        </div>
+
+                        <div class="p-3 bg-black/30 rounded-xl border border-white/5 space-y-1.5 text-xs">
+                            <div class="flex justify-between text-slate-400">
+                                <span>Estimated Price:</span>
+                                <span id="est-price" class="text-white font-bold">$0.00</span>
+                            </div>
+                            <div class="flex justify-between text-slate-400">
+                                <span>Estimated Total:</span>
+                                <span id="est-total" class="text-sky-400 font-extrabold">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 pt-2">
+                            <button onclick="executeTrade('BUY')" class="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-400 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition">
+                                Buy Order
+                            </button>
+                            <button onclick="executeTrade('SELL')" class="flex-1 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-400 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition">
+                                Sell Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Quick Metrics -->
+                <div class="liquid-glass p-5 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Account Summary</h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Buying Power:</span>
+                            <span id="summary-cash" class="text-white font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Total Portfolio Value:</span>
+                            <span id="summary-total" class="text-emerald-400 font-black">$0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Total Profit / Loss:</span>
+                            <span id="summary-pl" class="font-bold">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Dedicated Virtual Stock Trading Simulator Ledger -->
+        <div class="liquid-glass p-6 rounded-2xl space-y-4">
+            <div class="flex flex-wrap justify-between items-center border-b border-white/10 pb-4 gap-2">
+                <div>
+                    <h3 class="text-lg font-black text-white flex items-center gap-2">
+                        💼 Virtual Stock Simulator & Active Portfolio
+                    </h3>
+                    <p class="text-xs text-slate-400">Track open positions, average cost basis, live market value, and unrealized profit/loss[cite: 6].</p>
+                </div>
+                <button onclick="loadPortfolio()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-slate-300">
+                    🔄 Refresh Ledger
+                </button>
+            </div>
+
+            <!-- Holdings Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="text-[11px] font-bold uppercase text-slate-400 border-b border-white/10">
+                        <tr>
+                            <th class="pb-3">Symbol / Company</th>
+                            <th class="pb-3">Shares Owned</th>
+                            <th class="pb-3">Avg Entry Price</th>
+                            <th class="pb-3">Current Price</th>
+                            <th class="pb-3">Market Value</th>
+                            <th class="pb-3">Total Return (P/L)</th>
+                            <th class="pb-3 text-right">Quick Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="holdings-table-body" class="divide-y divide-white/5 font-semibold">
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-slate-500 italic">No active positions open in your portfolio[cite: 6]. Use the order desk above to execute trades[cite: 6]!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/static/sidebar.js"></script>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        let currentSymbol = "AAPL";
+        let currentPrice = 0.0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchStockData();
+            loadPortfolio();
+        });
+
+        async function fetchStockData() {
+            const inputSymbol = document.getElementById('ticker-input').value.trim();
+            if (inputSymbol) currentSymbol = inputSymbol.toUpperCase();
+
+            document.getElementById('trade-symbol').value = currentSymbol;
+
+            try {
+                const res = await fetch(`/api/stock/${currentSymbol}`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    currentPrice = data.price;
+                    document.getElementById('stock-symbol').innerText = data.symbol;
+                    document.getElementById('stock-name').innerText = data.name;
+                    document.getElementById('stock-price').innerText = `$${data.price.toFixed(2)}`;
+                    
+                    const changeEl = document.getElementById('stock-change');
+                    const isPositive = data.change >= 0;
+                    changeEl.innerText = `${isPositive ? '+' : ''}${data.change.toFixed(2)} (${data.percent_change.toFixed(2)}%)`;
+                    changeEl.className = `text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`;
+
+                    document.getElementById('stat-mcap').innerText = typeof data.market_cap === 'number' ? `$${(data.market_cap / 1e9).toFixed(2)}B` : 'N/A';
+                    document.getElementById('stat-pe').innerText = typeof data.pe_ratio === 'number' ? data.pe_ratio.toFixed(2) : 'N/A';
+                    document.getElementById('stat-high').innerText = typeof data.high_52 === 'number' ? `$${data.high_52.toFixed(2)}` : 'N/A';
+                    document.getElementById('stat-low').innerText = typeof data.low_52 === 'number' ? `$${data.low_52.toFixed(2)}` : 'N/A';
+
+                    calculateEstimatedTotal();
+                    embedTradingViewChart(data.symbol);
+                }
+            } catch (err) {
+                console.error("Error loading stock data:", err);
+            }
+        }
+
+        function calculateEstimatedTotal() {
+            const shares = parseInt(document.getElementById('trade-shares').value) || 0;
+            const total = shares * currentPrice;
+            document.getElementById('est-price').innerText = `$${currentPrice.toFixed(2)}`;
+            document.getElementById('est-total').innerText = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
+        function embedTradingViewChart(symbol) {
+            document.getElementById("tradingview_chart_container").innerHTML = "";
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#0f172a",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "save_image": false,
+                "container_id": "tradingview_chart_container"
+            });
+        }
+
+        async function loadPortfolio() {
+            try {
+                const res = await fetch('/api/portfolio');
+                const data = await res.json();
+                if (data.success) {
+                    renderPortfolio(data.portfolio);
+                }
+            } catch (err) {
+                console.error("Error loading portfolio:", err);
+            }
+        }
+
+        function renderPortfolio(portfolio) {
+            const holdingsTable = document.getElementById('holdings-table-body');
+            const keys = Object.keys(portfolio.holdings);
+
+            let holdingsValue = 0;
+            let totalCostBasis = 0;
+
+            if (keys.length === 0) {
+                holdingsTable.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-500 italic">No active positions open in your portfolio[cite: 6]. Use the order desk above to execute trades[cite: 6]!</td></tr>`;
+            } else {
+                holdingsTable.innerHTML = keys.map(symbol => {
+                    const item = portfolio.holdings[symbol];
+                    const currentItemPrice = item.current_price || item.avg_price;
+                    const marketValue = item.shares * currentItemPrice;
+                    const costBasis = item.shares * item.avg_price;
+                    const pl = marketValue - costBasis;
+                    const plPercent = costBasis > 0 ? (pl / costBasis) * 100 : 0;
+
+                    holdingsValue += marketValue;
+                    totalCostBasis += costBasis;
+
+                    const isProfitable = pl >= 0;
+
+                    return `
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="py-3.5 font-bold text-white">${symbol}</td>
+                            <td class="py-3.5 text-slate-200">${item.shares}</td>
+                            <td class="py-3.5 text-slate-300">$${item.avg_price.toFixed(2)}</td>
+                            <td class="py-3.5 text-slate-300">$${currentItemPrice.toFixed(2)}</td>
+                            <td class="py-3.5 text-white font-bold">$${marketValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3.5 ${isProfitable ? 'text-emerald-400' : 'text-rose-400'} font-bold">
+                                ${isProfitable ? '+' : ''}$${pl.toFixed(2)} (${isProfitable ? '+' : ''}${plPercent.toFixed(2)}%)
+                            </td>
+                            <td class="py-3.5 text-right space-x-2">
+                                <button onclick="quickSelectTicker('${symbol}')" class="px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[10px] font-bold">
+                                    Chart
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            const totalPortfolioVal = portfolio.cash + holdingsValue;
+            const totalPL = totalPortfolioVal - 100000.00; // Starting virtual cash: $100k
+            const isTotalProfitable = totalPL >= 0;
+
+            document.getElementById('summary-cash').innerText = `$${portfolio.cash.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('summary-total').innerText = `$${totalPortfolioVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            const plSummaryEl = document.getElementById('summary-pl');
+            plSummaryEl.innerText = `${isTotalProfitable ? '+' : ''}$${totalPL.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            plSummaryEl.className = `font-bold ${isTotalProfitable ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+
+        function quickSelectTicker(symbol) {
+            document.getElementById('ticker-input').value = symbol;
+            fetchStockData();
+        }
+
+        async function executeTrade(action) {
+            const shares = parseInt(document.getElementById('trade-shares').value);
+            if (!shares || shares <= 0) {
+                alert("Please enter a valid share quantity.");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/trade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ticker: currentSymbol, shares })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    renderPortfolio(data.portfolio);
+                } else {
+                    alert(data.message || "Trade execution failed.");
+                }
+            } catch (err) {
+                alert("Network error executing order.");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyQuest.AI - Next-Gen Financial Literacy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head><script>
+    (function() {
+        const savedTheme = localStorage.getItem('mq_theme') || 'dark';
+        const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.style.setProperty('--accent-color', savedAccent);
+        
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedAccent);
+        if (result) {
+            const r = parseInt(result[1], 16), g = parseInt(result[2], 16), b = parseInt(result[3], 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            document.documentElement.style.setProperty('--accent-text', yiq >= 128 ? '#020617' : '#ffffff');
+        }
+    })();
+</script>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 overflow-x-hidden">
+
+    <!-- Navbar -->
+    <header class="w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center relative z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 to-emerald-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-sky-500/20">
+                MQ
+            </div>
+            <div>
+                <span class="text-lg font-black text-white tracking-wider block leading-tight">MoneyQuest</span>
+                <span class="text-[10px] font-bold tracking-widest uppercase text-sky-400">AI Platform</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <a href="/terminal" class="liquid-btn-primary px-5 py-2.5 rounded-xl text-xs font-extrabold transition">
+                Launch Terminal →
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-6 space-y-20 py-10">
+        
+        <!-- Hero Section -->
+        <section class="text-center space-y-6 max-w-3xl mx-auto pt-8">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full liquid-glass border border-sky-400/30 text-sky-300 text-xs font-bold">
+                <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                Interactive Paper Trading & Financial Intelligence Engine
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight">
+                Master the Markets with <span class="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">Risk-Free Intelligence</span>
+            </h1>
+            <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto">
+                MoneyQuest combines real-time TradingView market feeds, AI-driven budget analytics, and intelligent financial tutoring to transform the way you build wealth.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 pt-4">
+                <a href="/terminal" class="liquid-btn-primary px-8 py-3.5 rounded-xl text-sm font-black transition">
+                    Open Trading Terminal
+                </a>
+                <a href="/budget" class="liquid-btn-secondary px-8 py-3.5 rounded-xl text-sm font-black transition">
+                    Explore Budget Planner
+                </a>
+            </div>
+        </section>
+
+        <!-- Core 3 Sections -->
+        <section class="space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-sky-400">Core Architecture</h2>
+                <p class="text-2xl font-black text-white">Three Pillars of Financial Mastery</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Market Terminal Card -->
+                <div class="liquid-glass p-8 rounded-2xl flex flex-col justify-between space-y-6 hover:border-sky-400/50 transition duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-2xl">
+                            📈
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Market Terminal</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Simulate real stock trades using interactive TradingView charts, real-time market quotes, and portfolio performance analytics.
+                        </p>
+                    </div>
+                    <a href="/terminal" class="text-xs font-extrabold text-sky-400 hover:text-sky-300 flex items-center gap-1">
+                        Explore Terminal →
+                    </a>
+                </div>
+
+                <!-- Budget Planner Card -->
+                <div class="liquid-glass p-8 rounded-2xl flex flex-col justify-between space-y-6 hover:border-emerald-400/50 transition duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-2xl">
+                            📊
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Budget Planner</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Track income and expenses, calculate your net cash flow dynamically, and visualize spending breakdowns with liquid visual charts.
+                        </p>
+                    </div>
+                    <a href="/budget" class="text-xs font-extrabold text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                        Manage Budget →
+                    </a>
+                </div>
+
+                <!-- AI Tutor & News Card -->
+                <div class="liquid-glass p-8 rounded-2xl flex flex-col justify-between space-y-6 hover:border-purple-400/50 transition duration-300">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-2xl">
+                            🤖
+                        </div>
+                        <h3 class="text-xl font-bold text-white">AI Tutor & News</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">
+                            Ask complex financial questions to your AI mentor and read live curated financial market news summaries in real time.
+                        </p>
+                    </div>
+                    <a href="/chatbot" class="text-xs font-extrabold text-purple-400 hover:text-purple-300 flex items-center gap-1">
+                        Start Learning →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRD Roadmap: Upcoming Features Section -->
+        <section class="space-y-8 pt-6 border-t border-white/10">
+            <div class="text-center space-y-2">
+                <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Product Roadmap</span>
+                <h2 class="text-3xl font-black text-white">Upcoming Platform Capabilities</h2>
+                <p class="text-slate-400 text-sm max-w-xl mx-auto">Key extensions from our PRD pipeline coming in upcoming releases.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Upcoming Feature 1 -->
+                <div class="liquid-glass p-6 rounded-2xl border border-white/5 hover:border-sky-400/30 transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl">🏆</span>
+                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-400 border border-sky-400/30">Q3 Roadmap</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">Gamified Skill Badges</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Earn verified financial literacy badges and level up your investor rank as you complete interactive lessons and paper trading milestones.
+                    </p>
+                </div>
+
+                <!-- Upcoming Feature 2 -->
+                <div class="liquid-glass p-6 rounded-2xl border border-white/5 hover:border-emerald-400/30 transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl">🎯</span>
+                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">In Development</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">Automated Savings Goals</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Set custom financial targets (emergency fund, house deposit) with smart progress tracking and automated virtual deposit allocations.
+                    </p>
+                </div>
+
+                <!-- Upcoming Feature 3 -->
+                <div class="liquid-glass p-6 rounded-2xl border border-white/5 hover:border-purple-400/30 transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl">⚡</span>
+                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-400 border border-purple-400/30">Q4 Roadmap</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">AI Portfolio Stress-Test</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Simulate market crashes, inflation spikes, and interest rate hikes to test how your simulated stock portfolio withstands real-world shocks.
+                    </p>
+                </div>
+
+                <!-- Upcoming Feature 4 -->
+                <div class="liquid-glass p-6 rounded-2xl border border-white/5 hover:border-amber-400/30 transition">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-2xl">👥</span>
+                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-400/30">Community</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-2">Social Leaderboards</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Compete in weekly simulated trading leagues with peers, share winning investment strategies, and compare net worth growth metrics.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Web Footer Section -->
+    <footer class="w-full border-t border-white/10 liquid-glass mt-20 bg-slate-950/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+                
+                <!-- Brand Info Column -->
+                <div class="space-y-4 md:col-span-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-400 to-emerald-400 flex items-center justify-center font-black text-slate-950 text-sm shadow-md">
+                            MQ
+                        </div>
+                        <span class="text-base font-black text-white tracking-wider">MoneyQuest.AI</span>
+                    </div>
+                    <p class="text-slate-400 text-xs leading-relaxed">
+                        Next-generation financial simulator combining real market intelligence, budgeting tools, and conversational AI tutoring.
+                    </p>
+                </div>
+
+                <!-- Quick Platform Navigation -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">Platform Hub</h4>
+                    <ul class="space-y-2 text-xs font-medium text-slate-400">
+                        <li><a href="/terminal" class="hover:text-sky-400 transition">Market Terminal</a></li>
+                        <li><a href="/budget" class="hover:text-sky-400 transition">Budget Planner</a></li>
+                        <li><a href="/chatbot" class="hover:text-sky-400 transition">AI Tutor & News Hub</a></li>
+                    </ul>
+                </div>
+
+                <!-- Product Compliance & Resources -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">Resources</h4>
+                    <ul class="space-y-2 text-xs font-medium text-slate-400">
+                        <li><a href="#" class="hover:text-sky-400 transition">Documentation & PRD</a></li>
+                        <li><a href="#" class="hover:text-sky-400 transition">TradingView Data Rules</a></li>
+                        <li><a href="#" class="hover:text-sky-400 transition">API System Health</a></li>
+                    </ul>
+                </div>
+
+                <!-- Platform Status / Newsletter -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">Platform Updates</h4>
+                    <p class="text-xs text-slate-400">Receive major platform updates and AI feature releases.</p>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Enter your email" class="liquid-input px-3 py-2 text-xs rounded-xl flex-1">
+                        <button class="liquid-btn-primary px-3 py-2 text-xs rounded-xl font-bold">Join</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Legal & Disclaimer Row -->
+            <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-slate-500">
+                <p>© 2026 MoneyQuest.AI. All rights reserved. Designed for financial education and simulation purposes.</p>
+                <div class="flex items-center gap-6">
+                    <span class="hover:underline cursor-pointer">Educational Disclaimer</span>
+                    <span class="hover:underline cursor-pointer">Privacy Policy</span>
+                    <span class="hover:underline cursor-pointer">Terms of Service</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
