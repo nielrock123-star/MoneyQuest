@@ -114,18 +114,29 @@ def get_stock_data(ticker):
     try:
         symbol = ticker.upper()
         stock = yf.Ticker(symbol)
-        info = stock.info
+        history = stock.history(period='5d', interval='1d', auto_adjust=False)
+        closes = history['Close'].dropna() if not history.empty and 'Close' in history else []
 
-        price = info.get('currentPrice') or info.get('regularMarketPrice') or info.get('previousClose', 0.0)
-        prev_close = info.get('previousClose') or price
+        if len(closes) == 0:
+            return jsonify({"success": False, "message": f"No quote data found for {symbol}"}), 404
+
+        price = float(closes.iloc[-1])
+        prev_close = float(closes.iloc[-2]) if len(closes) > 1 else price
+
+        try:
+            info = stock.info
+        except Exception:
+            info = {}
+
+        name = info.get('shortName') or info.get('longName') or symbol
         change = price - prev_close
         percent_change = (change / prev_close * 100) if prev_close else 0.0
 
         return jsonify({
             "success": True,
             "symbol": symbol,
-            "name": info.get('shortName', symbol),
-            "price": float(price),
+            "name": name,
+            "price": price,
             "change": float(change),
             "percent_change": float(percent_change),
             "market_cap": info.get('marketCap', 'N/A'),
