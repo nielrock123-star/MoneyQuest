@@ -1,6 +1,8 @@
 from flask import Flask, render_template, jsonify, request
 import yfinance as yf
 import os
+import re
+import requests
 from dotenv import load_dotenv
 from chatbot import get_advisor
 
@@ -112,40 +114,129 @@ def get_market_news():
 @app.route('/api/stock/<ticker>')
 def get_stock_data(ticker):
     try:
-        symbol = ticker.upper()
+        return jsonify(fetch_quote(ticker))
+    except ValueError as e:
+        return jsonify({"success": False, "message": str(e)}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 502
+
+def fetch_quote(ticker):
+    symbol = ticker.strip().upper()
+    if not re.fullmatch(r'[A-Z0-9^=.-]{1,15}', symbol):
+        raise ValueError('Enter a valid ticker symbol.')
+
+    chart_url = f'https://query1.finance.yahoo.com/v8/finance/chart/{symbol}'
+    params = {'range': '5d', 'interval': '1d', 'events': 'history'}
+    try:
+        response = requests.get(chart_url, params=params, timeout=10)
+        response.raise_for_status()
+        chart = response.json().get('chart', {})
+        result = (chart.get('result') or [None])[0]
+        if result:
+            closes = [value for value in result.get('indicators', {}).get('quote', [{}])[0].get('close', []) if value is not None]
+            if closes:
+                price = float(closes[-1])
+                previous = float(closes[-2]) if len(closes) > 1 else price
+                change = price - previous
+                return {
+                    'success': True,
+                    'symbol': symbol,
+                    'name': symbol,
+                    'price': price,
+                    'change': change,
+                    'percent_change': (change / previous * 100) if previous else 0.0,
+                    'market_cap': 'N/A',
+                    'pe_ratio': 'N/A',
+                    'high_52': 'N/A',
+                    'low_52': 'N/A'
+                }
+    except requests.RequestException:
+        pass
+
+    try:
         stock = yf.Ticker(symbol)
         history = stock.history(period='5d', interval='1d', auto_adjust=False)
         closes = history['Close'].dropna() if not history.empty and 'Close' in history else []
+    except Exception:
+        closes = []
 
-        if len(closes) == 0:
-            return jsonify({"success": False, "message": f"No quote data found for {symbol}"}), 404
-
+    if len(closes) > 0:
         price = float(closes.iloc[-1])
-        prev_close = float(closes.iloc[-2]) if len(closes) > 1 else price
+        previous = float(closes.iloc[-2]) if len(closes) > 1 else price
+    else:
+        fallback_url = f'https://stooq.com/q/d/l/?s={symbol.lower()}.us&i=d'
+        fallback_response = requests.get(fallback_url, timeout=10)
+        fallback_response.raise_for_status()
+        rows = [row.split(',') for row in fallback_response.text.strip().splitlines()[1:] if row]
+        closes = [float(row[4]) for row in rows if len(row) > 4 and row[4] not in {'', 'N/D'}]
+        if not closes:
+            raise ValueError(f'No quote data found for {symbol}')
+        price = closes[-1]
+        previous = closes[-2] if len(closes) > 1 else price
 
+    change = price - previous
+    return {
+        'success': True,
+        'symbol': symbol,
+        'name': symbol,
+        'price': price,
+        'change': change,
+        'percent_change': (change / previous * 100) if previous else 0.0,
+        'market_cap': 'N/A',
+        'pe_ratio': 'N/A',
+        'high_52': 'N/A',
+        'low_52': 'N/A'
+    }
+
+@app.route('/api/portfolio')
+def get_portfolio():
+    portfolio = {'cash': PORTFOLIO['cash'], 'holdings': {}}
+    for symbol, holding in PORTFOLIO['holdings'].items():
+        item = dict(holding)
         try:
-            info = stock.info
+            item['current_price'] = fetch_quote(symbol)['price']
         except Exception:
-            info = {}
+            item['current_price'] = item['avg_price']
+        portfolio['holdings'][symbol] = item
+    return jsonify({'success': True, 'portfolio': portfolio})
 
-        name = info.get('shortName') or info.get('longName') or symbol
-        change = price - prev_close
-        percent_change = (change / prev_close * 100) if prev_close else 0.0
+@app.route('/api/trade', methods=['POST'])
+def execute_trade():
+    data = request.get_json(silent=True) or {}
+    action = str(data.get('action', '')).upper()
+    symbol = str(data.get('ticker', '')).strip().upper()
+    shares = data.get('shares')
+    if action not in {'BUY', 'SELL'} or not re.fullmatch(r'[A-Z0-9^=.-]{1,15}', symbol):
+        return jsonify({'success': False, 'message': 'Invalid trade details.'}), 400
+    try:
+        shares = int(shares)
+        price = fetch_quote(symbol)['price']
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'message': 'Enter a valid share quantity and ticker.'}), 400
+    if shares <= 0:
+        return jsonify({'success': False, 'message': 'Share quantity must be positive.'}), 400
 
-        return jsonify({
-            "success": True,
-            "symbol": symbol,
-            "name": name,
-            "price": price,
-            "change": float(change),
-            "percent_change": float(percent_change),
-            "market_cap": info.get('marketCap', 'N/A'),
-            "pe_ratio": info.get('trailingPE', 'N/A'),
-            "high_52": info.get('fiftyTwoWeekHigh', 'N/A'),
-            "low_52": info.get('fiftyTwoWeekLow', 'N/A')
-        })
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 400
+    holding = PORTFOLIO['holdings'].get(symbol)
+    if action == 'BUY':
+        total = shares * price
+        if total > PORTFOLIO['cash']:
+            return jsonify({'success': False, 'message': 'Insufficient buying power.'}), 400
+        if holding:
+            total_shares = holding['shares'] + shares
+            holding['avg_price'] = ((holding['shares'] * holding['avg_price']) + total) / total_shares
+            holding['shares'] = total_shares
+        else:
+            PORTFOLIO['holdings'][symbol] = {'shares': shares, 'avg_price': price}
+        PORTFOLIO['cash'] -= total
+    else:
+        if not holding or holding['shares'] < shares:
+            return jsonify({'success': False, 'message': 'Not enough shares to sell.'}), 400
+        PORTFOLIO['cash'] += shares * price
+        holding['shares'] -= shares
+        if holding['shares'] == 0:
+            del PORTFOLIO['holdings'][symbol]
+
+    return get_portfolio()
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
