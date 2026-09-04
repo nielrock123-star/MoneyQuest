@@ -95,11 +95,21 @@
             localStorage.setItem('mq_coins', coins);
             document.getElementById('store-coins').innerText = coins;
 
-            let currentSimCash = parseFloat(localStorage.getItem('mq_sim_cash')) || 100000.0;
-            currentSimCash += cashAmount;
-            localStorage.setItem('mq_sim_cash', currentSimCash);
-
-            alert(`🎉 Success! Added $${cashAmount.toLocaleString()} to your Market Terminal cash balance.`);
+            try {
+                const response = await fetch('/api/portfolio/topup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({amount: cashAmount})
+                });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message || 'Top-up failed');
+                alert(`🎉 Success! Added $${cashAmount.toLocaleString()} to your Market Terminal cash balance.`);
+            } catch (error) {
+                coins += cost;
+                localStorage.setItem('mq_coins', coins);
+                document.getElementById('store-coins').innerText = coins;
+                alert('The purchase could not be completed. Please try again.');
+            }
         }
     </script>
 </body>

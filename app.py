@@ -78,6 +78,34 @@ PORTFOLIO = {
     "holdings": {}
 }
 
+LESSONS = [
+    "Separate needs, wants, and savings. The 50/30/20 framework assigns about 50% of take-home pay to needs, 30% to wants, and 20% to savings or debt payoff. Build an emergency fund covering three to six months of essential expenses.",
+    "Credit scores are influenced most by payment history and credit utilization. Pay on time, keep balances well below your limits, and avoid opening several new accounts at once.",
+    "Stocks represent ownership in companies. Index funds and ETFs spread risk across many companies, while dollar-cost averaging invests a consistent amount on a schedule instead of trying to time the market.",
+    "Tax planning uses legal accounts and timing choices. Traditional retirement contributions may reduce taxable income today, while qualified Roth withdrawals can be tax-free later.",
+    "Cryptocurrency uses digital wallets and blockchain networks. Prices can be extremely volatile, transactions may be irreversible, and protecting private keys is the owner’s responsibility.",
+    "Real estate returns come from rental income, appreciation, and equity. Buying also includes interest, taxes, insurance, maintenance, and closing costs.",
+    "Wealth building combines a savings rate, diversified investments, reasonable risk, and time. Rebalancing restores your target allocation when market movements change it."
+]
+
+QUESTION_BANKS = [
+    [("What share of take-home pay does the 50/30/20 rule assign to needs?", ["20%", "30%", "50%", "80%"], 2), ("A suitable starter emergency fund is kept primarily for:", ["Daily entertainment", "Unexpected essential expenses", "Speculative trading", "Luxury purchases"], 1), ("Which is usually a want?", ["Rent", "Groceries", "Streaming subscription", "Basic utilities"], 2), ("Compound interest earns returns on:", ["Only taxes", "Principal and accumulated interest", "Only fees", "Credit limits"], 1), ("A high-yield savings account is useful because it offers:", ["Liquidity and interest", "Guaranteed stock gains", "Unlimited credit", "Tax-free wages"], 0), ("Automating savings helps by:", ["Creating consistency", "Eliminating all risk", "Raising a credit limit", "Avoiding every tax"], 0), ("Net income means pay:", ["Before deductions", "After deductions", "Before earning", "Before budgeting"], 1), ("Inflation generally reduces cash's:", ["Purchasing power", "Account number", "Liquidity", "FDIC coverage"], 0), ("A budget is best described as a:", ["Spending plan", "Loan application", "Credit report", "Tax penalty"], 0), ("A good first budgeting step is to:", ["Track income and expenses", "Buy stocks", "Close all accounts", "Ignore irregular bills"], 0)],
+    [("The largest FICO factor is usually:", ["Payment history", "Credit mix", "New accounts", "Age only"], 0), ("Credit utilization is:", ["Debt divided by available credit", "Income divided by rent", "Savings divided by taxes", "Interest divided by income"], 0), ("A lower utilization ratio is generally:", ["Better for scores", "Always illegal", "A late payment", "A tax deduction"], 0), ("Checking your own score is normally a:", ["Hard inquiry", "Soft inquiry", "Default", "Collection"], 1), ("A hard inquiry can follow:", ["Applying for a credit card", "Viewing your report", "Paying cash", "Making a budget"], 0), ("Paying on time primarily protects:", ["Payment history", "Stock price", "Mortgage rate forever", "Tax bracket"], 0), ("A secured card is backed by a:", ["Cash deposit", "Stock dividend", "Tax refund", "Mortgage"], 0), ("Closing an old card can reduce available:", ["Credit", "Income", "Rent", "Insurance"], 0), ("APR measures a borrowing cost over:", ["One year", "One hour", "One purchase only", "A lifetime"], 0), ("The safest debt habit is to:", ["Pay at least on time and reduce balances", "Max every card", "Ignore statements", "Open accounts monthly"], 0)],
+    [("A stock represents:", ["Company ownership", "A bank deposit", "A tax bill", "A rental lease"], 0), ("An ETF is generally a:", ["Basket of investments", "Credit score", "Checking account", "Mortgage"], 0), ("Diversification mainly reduces:", ["Single-company risk", "Every possible loss", "Taxes to zero", "Inflation completely"], 0), ("Dollar-cost averaging invests:", ["A fixed amount regularly", "Only at market peaks", "Only in cash", "After every rumor"], 0), ("Market capitalization equals price times:", ["Shares outstanding", "Taxes paid", "Employees", "Debt payments"], 0), ("A dividend is a distribution to:", ["Shareholders", "Only regulators", "Credit bureaus", "Tenants"], 0), ("A bond is generally a:", ["Loan to an issuer", "Piece of real estate", "Stock split", "Tax form"], 0), ("Long-term investing should consider:", ["Risk tolerance and time horizon", "Only headlines", "Guaranteed returns", "Daily predictions"], 0), ("An index fund usually aims to:", ["Track a market index", "Guarantee profit", "Avoid all fees", "Set tax rates"], 0), ("Past performance is:", ["Not a guarantee of future results", "A guaranteed forecast", "Always irrelevant", "A tax credit"], 0)],
+    [("A traditional 401(k) contribution may reduce:", ["Current taxable income", "Credit utilization", "Rent", "Stock volatility"], 0), ("A Roth IRA is generally funded with:", ["After-tax money", "Only borrowed money", "Mortgage proceeds", "Credit points"], 0), ("A tax bracket applies to:", ["A range of taxable income", "Only your bank balance", "Your credit limit", "Every purchase equally"], 0), ("A W-2 usually reports:", ["Employee wages", "Stock ownership", "Mortgage equity", "Crypto keys"], 0), ("A 1099 may report:", ["Nonemployee income", "A credit score", "A property deed", "A debit PIN"], 0), ("A deduction generally lowers:", ["Taxable income", "Your salary rate", "Your credit limit", "Share count"], 0), ("Capital gains come from selling an asset for:", ["More than its basis", "Less than zero", "A fixed wage", "A credit inquiry"], 0), ("Tax-advantaged accounts should be chosen based on:", ["Goals and eligibility", "Social media only", "Guaranteed returns", "Account color"], 0), ("Keeping tax records helps support:", ["Your tax return", "A stock split", "A credit freeze", "A wallet seed"], 0), ("A tax professional can help with:", ["Personal tax questions", "Guaranteeing refunds", "Setting stock prices", "Removing all taxes"], 0)],
+    [("A blockchain is best described as a:", ["Distributed digital ledger", "Savings account", "Credit bureau", "Tax bracket"], 0), ("A crypto wallet primarily manages:", ["Keys and transactions", "Mortgage rates", "W-2 forms", "Credit scores"], 0), ("Crypto prices are often:", ["Volatile", "Fixed by law", "Guaranteed", "Unchangeable"], 0), ("A private key should be:", ["Kept secret", "Posted publicly", "Shared in a chat", "Printed on a billboard"], 0), ("A smart contract is:", ["Code that can execute rules", "A mortgage document", "A credit report", "A tax refund"], 0), ("A major crypto risk is:", ["Irreversible transactions", "Guaranteed insurance", "No price movement", "Unlimited refunds"], 0), ("DeFi commonly refers to:", ["Decentralized finance", "Deferred filing", "Debt fixing", "Daily finance"], 0), ("Diversifying digital assets can:", ["Reduce concentration risk", "Guarantee profit", "Remove volatility", "Recover lost keys"], 0), ("A seed phrase should be stored:", ["Securely offline", "In public comments", "In an unknown link", "With a stranger"], 0), ("Before buying crypto, an investor should:", ["Understand the risks", "Assume guaranteed returns", "Borrow without limits", "Ignore security"], 0)],
+    [("Home equity is market value minus:", ["Remaining mortgage debt", "Annual income", "Credit limit", "Stock dividends"], 0), ("A down payment is paid:", ["Up front toward a purchase", "Only after selling", "To a credit bureau", "As a tax bracket"], 0), ("PMI may be required when a down payment is:", ["Below a lender's threshold", "Always 100%", "Paid in cash", "A dividend"], 0), ("A fixed mortgage rate:", ["Stays constant under its terms", "Changes every hour", "Tracks stocks", "Eliminates taxes"], 0), ("Property taxes are paid to:", ["A local government", "A stock exchange", "A credit card", "A wallet"], 0), ("Maintenance is a cost of:", ["Owning property", "Checking credit", "Buying an ETF", "Filing a W-2"], 0), ("Renting often offers more:", ["Flexibility", "Equity", "Ownership", "Appreciation"], 0), ("A mortgage preapproval indicates:", ["Tentative borrowing qualification", "A final deed", "Guaranteed approval", "A tax refund"], 0), ("A REIT can provide exposure to:", ["Real estate", "Credit reports", "Tax brackets", "Private keys"], 0), ("A home inspection evaluates:", ["Property condition", "Your FICO score", "Stock earnings", "Tax rate"], 0)],
+    [("Asset allocation means choosing a mix of:", ["Asset classes", "Passwords", "Tax forms", "Credit inquiries"], 0), ("Rebalancing restores a portfolio's:", ["Target allocation", "Guaranteed return", "Tax refund", "Credit limit"], 0), ("A higher risk tolerance may support:", ["More volatile investments", "No emergency fund", "Unlimited debt", "No diversification"], 0), ("An emergency fund helps avoid:", ["Selling investments for surprises", "All taxes", "Every market decline", "Credit checks"], 0), ("Compounding benefits most from:", ["Time and reinvestment", "Daily trading", "High fees", "Late payments"], 0), ("A portfolio review should consider:", ["Goals, time, and risk", "Only yesterday's price", "Rumors", "Guaranteed returns"], 0), ("Fees reduce investment:", ["Returns", "Share ownership always", "Tax law", "Income definition"], 0), ("A diversified portfolio can still:", ["Lose value", "Guarantee profit", "Avoid all risk", "Stop inflation"], 0), ("A long-term plan should be:", ["Consistent and periodically reviewed", "Changed on every headline", "Based on promises", "Unfunded"], 0), ("Financial freedom generally requires:", ["Sustainable saving and planning", "One lucky trade", "No budget", "Maximum debt"], 0)]
+]
+
+for module, lesson, bank in zip(MODULES, LESSONS, QUESTION_BANKS):
+    module['lesson'] = lesson
+    module['questions'] = [
+        {'id': index + 1, 'q': question, 'options': options, 'answer': answer,
+         'explanation': f'The correct answer is {options[answer]}.'}
+        for index, (question, options, answer) in enumerate(bank)
+    ]
+
 
 def fetch_quote(ticker):
     symbol = ticker.strip().upper()
@@ -124,17 +152,21 @@ def fetch_quote(ticker):
     price = float(closes[-1])
     previous = float(closes[-2]) if len(closes) > 1 else price
     change = price - previous
+    try:
+        info = yf.Ticker(symbol).info
+    except Exception:
+        info = {}
     return {
         'success': True,
         'symbol': symbol,
-        'name': symbol,
+        'name': info.get('shortName') or info.get('longName') or symbol,
         'price': price,
         'change': change,
         'percent_change': (change / previous * 100) if previous else 0.0,
-        'market_cap': 'N/A',
-        'pe_ratio': 'N/A',
-        'high_52': 'N/A',
-        'low_52': 'N/A'
+        'market_cap': info.get('marketCap', 'N/A'),
+        'pe_ratio': info.get('trailingPE', 'N/A'),
+        'high_52': info.get('fiftyTwoWeekHigh', 'N/A'),
+        'low_52': info.get('fiftyTwoWeekLow', 'N/A')
     }
 
 @app.route('/')
@@ -197,6 +229,19 @@ def get_portfolio():
     return jsonify({'success': True, 'portfolio': portfolio})
 
 
+@app.route('/api/portfolio/topup', methods=['POST'])
+def top_up_portfolio():
+    data = request.get_json(silent=True) or {}
+    try:
+        amount = float(data.get('amount', 0))
+    except (TypeError, ValueError):
+        amount = 0
+    if amount <= 0:
+        return jsonify({'success': False, 'message': 'Invalid cash amount.'}), 400
+    PORTFOLIO['cash'] += amount
+    return get_portfolio()
+
+
 @app.route('/api/trade', methods=['POST'])
 def execute_trade():
     data = request.get_json(silent=True) or {}
@@ -235,4 +280,4 @@ def execute_trade():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)

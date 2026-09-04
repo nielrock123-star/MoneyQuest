@@ -3,81 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoneyQuest.AI - Financial Modules</title>
+    <title>MoneyQuest.AI - Financial Literacy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/style.css">
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('mq_theme') || 'dark';
-            const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            document.documentElement.style.setProperty('--accent-color', savedAccent);
-        })();
-    </script>
 </head>
 <body class="min-h-screen flex bg-slate-950 text-slate-100">
-
     <div id="sidebar-container"></div>
-
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
-        
-        <!-- Header Banner -->
-        <div class="flex flex-wrap justify-between items-center border-b border-white/10 pb-4 gap-4">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto min-h-screen space-y-6 max-w-7xl mx-auto">
+        <header class="flex flex-wrap justify-between items-center border-b border-white/10 pb-4 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-                    🎯 Financial Literacy Modules
-                </h1>
-                <p class="text-slate-400 text-xs mt-0.5">Master bite-sized financial lessons, complete 10-question quizzes, earn XP, and unlock badges!</p>
+                <h1 class="text-2xl font-black text-white">🎯 Financial Literacy Modules</h1>
+                <p class="text-slate-400 text-xs mt-1">Read each lesson, pass its quiz, and earn coins and XP.</p>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black text-xs flex items-center gap-1.5">
-                    <span>🪙</span> <span id="user-coins">0</span> Coins
-                </div>
-                <div class="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 font-black text-xs flex items-center gap-1.5">
-                    <span>⚡</span> <span id="user-xp">0</span> XP
-                </div>
-                <div class="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-xs flex items-center gap-1.5">
-                    <span>🏆</span> <span id="user-badges-count">0 / 7</span> Badges
-                </div>
+            <div class="flex gap-2 text-xs font-black">
+                <span class="px-3 py-2 rounded-xl bg-amber-500/10 text-amber-400">🪙 <b id="user-coins">250</b></span>
+                <span class="px-3 py-2 rounded-xl bg-sky-500/10 text-sky-400">⚡ <b id="user-xp">0</b></span>
+                <span class="px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-400">🏆 <b id="user-badges-count">0 / 7</b></span>
             </div>
-        </div>
-
-        <!-- Achievements & Badges Panel -->
-        <div class="liquid-glass p-5 rounded-2xl space-y-3">
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">ACHIEVEMENTS & BADGES</h2>
-            <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
-                <!-- Badges render dynamically -->
-            </div>
-        </div>
-
-        <!-- All 7 Modules Grid -->
-        <div id="modules-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Modules render dynamically -->
-        </div>
-
+        </header>
+        <section class="liquid-glass p-5 rounded-2xl space-y-3">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Achievements & Badges</h2>
+            <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3"></div>
+        </section>
+        <section id="modules-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></section>
     </main>
-
     <script src="/static/sidebar.js"></script>
     <script>
-        let coins = parseInt(localStorage.getItem('mq_coins')) || 250;
-        let xp = parseInt(localStorage.getItem('mq_xp')) || 0;
+        let coins = parseInt(localStorage.getItem('mq_coins'), 10) || 250;
+        let xp = parseInt(localStorage.getItem('mq_xp'), 10) || 0;
         let unlockedBadges = [];
+        let completedModules = [];
+        let activeModule = null;
+        let answers = {};
         try {
-            const savedBadges = JSON.parse(localStorage.getItem('mq_badges') || '[]');
-            unlockedBadges = Array.isArray(savedBadges) ? savedBadges : [];
+            const saved = JSON.parse(localStorage.getItem('mq_badges') || '[]');
+            unlockedBadges = Array.isArray(saved) ? saved : [];
+            const done = JSON.parse(localStorage.getItem('mq_completed_modules') || '[]');
+            completedModules = Array.isArray(done) ? done : [];
         } catch (error) {
             localStorage.removeItem('mq_badges');
+            localStorage.removeItem('mq_completed_modules');
         }
-
-        const ALL_BADGES = [
-            { id: "b1", name: "Budget Boss", icon: "📊" },
-            { id: "b2", name: "Credit Master", icon: "💳" },
-            { id: "b3", name: "Market Guru", icon: "📈" },
-            { id: "b4", name: "Tax Wizard", icon: "📑" },
-            { id: "b5", name: "Crypto Expert", icon: "🪙" },
-            { id: "b6", name: "Real Estate Pro", icon: "🏠" },
-            { id: "b7", name: "Wealth Titan", icon: "👑" }
-        ];
 
         document.addEventListener('DOMContentLoaded', () => {
             updateStats();
@@ -89,69 +55,62 @@
             document.getElementById('user-coins').innerText = coins;
             document.getElementById('user-xp').innerText = xp;
             document.getElementById('user-badges-count').innerText = `${unlockedBadges.length} / 7`;
+            localStorage.setItem('mq_coins', coins);
+            localStorage.setItem('mq_xp', xp);
         }
 
         function renderBadges() {
-            const container = document.getElementById('badges-grid');
-            container.innerHTML = ALL_BADGES.map(b => {
-                const isUnlocked = unlockedBadges.includes(b.id);
-                return `
-                    <div class="p-3 rounded-xl text-center border ${isUnlocked ? 'bg-sky-500/10 border-sky-500/40 text-white' : 'bg-black/20 border-white/5 text-slate-600 opacity-60'}">
-                        <span class="text-2xl block mb-1">${b.icon}</span>
-                        <span class="text-[10px] font-bold block">${b.name}</span>
-                        <span class="text-[9px] uppercase tracking-wider block mt-0.5 ${isUnlocked ? 'text-sky-400 font-extrabold' : 'text-slate-500'}">${isUnlocked ? 'Unlocked' : 'Locked'}</span>
-                    </div>
-                `;
+            const names = ['Budget Boss', 'Credit Master', 'Market Guru', 'Tax Wizard', 'Crypto Expert', 'Real Estate Pro', 'Wealth Titan'];
+            const icons = ['📊', '💳', '📈', '📑', '🪙', '🏠', '👑'];
+            document.getElementById('badges-grid').innerHTML = names.map((name, index) => {
+                const unlocked = unlockedBadges.includes(`b${index + 1}`);
+                return `<div class="p-3 rounded-xl text-center border ${unlocked ? 'bg-emerald-500/10 border-emerald-400/30' : 'bg-black/20 border-white/5 opacity-60'}"><span class="text-2xl block">${icons[index]}</span><span class="text-[10px] font-bold block">${name}</span><span class="text-[9px] uppercase ${unlocked ? 'text-emerald-400' : 'text-slate-500'}">${unlocked ? 'Unlocked' : 'Locked'}</span></div>`;
             }).join('');
         }
 
         async function fetchModules() {
-            const container = document.getElementById('modules-container');
-            try {
-                const res = await fetch('/api/quiz/modules');
-                const data = await res.json();
-                if (!data.success) return;
-
-                container.innerHTML = data.modules.map((m, idx) => `
-                    <div class="liquid-glass p-6 rounded-2xl flex flex-col justify-between space-y-4">
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] uppercase font-extrabold text-sky-400 tracking-wider">Module 0${idx + 1}</span>
-                                <span class="text-[10px] font-bold text-slate-400">${m.questions.length} Questions</span>
-                            </div>
-                            <h3 class="text-base font-bold text-white">${m.title}</h3>
-                            <p class="text-xs text-slate-400 line-clamp-3">${m.description}</p>
-                        </div>
-                        <div class="pt-4 border-t border-white/10 space-y-3">
-                            <div class="text-[10px] font-bold text-slate-400 flex justify-between">
-                                <span>Reward:</span>
-                                <div><span class="text-amber-400">+${m.coin_reward} 🪙</span> | <span class="text-purple-400">+${m.xp_reward} ⚡</span></div>
-                            </div>
-                            <button onclick="claimModuleReward('${m.badge_id}', ${m.coin_reward}, ${m.xp_reward})" class="w-full liquid-btn-primary py-2 rounded-xl text-xs font-bold">
-                                Start Quiz & Complete
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                container.innerHTML = `<p class="text-xs text-rose-400">Failed to load modules from server.</p>`;
-            }
+            const response = await fetch('/api/quiz/modules');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Unable to load modules');
+            renderModules(data.modules);
         }
 
-        function claimModuleReward(badgeId, coinReward, xpReward) {
-            coins += coinReward;
-            xp += xpReward;
-            if (!unlockedBadges.includes(badgeId)) {
-                unlockedBadges.push(badgeId);
+        function renderModules(modules) {
+            document.getElementById('modules-container').innerHTML = modules.map((module, index) => `
+                <article class="liquid-glass p-6 rounded-2xl flex flex-col justify-between gap-5">
+                    <div class="space-y-3"><div class="flex justify-between"><span class="text-[10px] uppercase font-extrabold text-sky-400">Module 0${index + 1}</span><span class="text-[10px] text-slate-400">${module.questions.length} MCQs</span></div><h2 class="text-lg font-black text-white">${module.title}</h2><p class="text-xs text-slate-400">${module.description}</p></div>
+                    <button onclick="openLesson('${module.id}')" class="w-full liquid-btn-primary py-2.5 rounded-xl text-xs font-bold">${completedModules.includes(module.id) ? 'Review Lesson' : 'Open Lesson'} →</button>
+                </article>`).join('');
+        }
+
+        async function openLesson(moduleId) {
+            const response = await fetch('/api/quiz/modules');
+            const data = await response.json();
+            activeModule = data.modules.find(module => module.id === moduleId);
+            document.getElementById('modules-container').innerHTML = `<div class="liquid-glass p-6 md:p-8 rounded-2xl space-y-6 md:col-span-2 lg:col-span-3"><div class="flex flex-wrap justify-between gap-3"><div><span class="text-xs font-bold uppercase text-sky-400">Lesson</span><h2 class="text-2xl font-black text-white">${activeModule.title}</h2></div><button onclick="fetchModules()" class="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold">← All Modules</button></div><p class="text-sm leading-7 text-slate-300">${activeModule.lesson}</p><div class="border-t border-white/10 pt-5 flex justify-end"><button onclick="startQuiz()" class="liquid-btn-primary px-5 py-3 rounded-xl text-xs font-black">Take ${activeModule.questions.length}-Question Quiz →</button></div></div>`;
+        }
+
+        function startQuiz() {
+            answers = {};
+            document.getElementById('modules-container').innerHTML = `<div class="liquid-glass p-6 md:p-8 rounded-2xl space-y-6 md:col-span-2 lg:col-span-3"><div class="flex justify-between gap-3 border-b border-white/10 pb-4"><div><span class="text-xs font-bold uppercase text-sky-400">Quiz</span><h2 class="text-xl font-black text-white">${activeModule.title}</h2></div><button onclick="openLesson('${activeModule.id}')" class="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold">Review Lesson</button></div><div class="space-y-5">${activeModule.questions.map((question, index) => `<fieldset class="p-4 rounded-xl bg-black/20 border border-white/5"><legend class="text-sm font-bold text-white mb-3">${index + 1}. ${question.q}</legend><div class="grid sm:grid-cols-2 gap-2">${question.options.map((option, optionIndex) => `<label class="flex gap-2 p-3 rounded-lg bg-white/5 text-xs cursor-pointer"><input type="radio" name="q${index}" onchange="answers[${index}]=${optionIndex}"><span>${option}</span></label>`).join('')}</div></fieldset>`).join('')}</div><button onclick="submitQuiz()" class="liquid-btn-primary w-full py-3 rounded-xl text-xs font-black">Submit Answers</button></div>`;
+        }
+
+        function submitQuiz() {
+            if (Object.keys(answers).length !== activeModule.questions.length) { alert('Please answer every question first.'); return; }
+            const score = activeModule.questions.reduce((total, question, index) => total + (answers[index] === question.answer ? 1 : 0), 0);
+            const passed = score >= Math.ceil(activeModule.questions.length * 0.7);
+            let reward = '';
+            if (passed && !completedModules.includes(activeModule.id)) {
+                coins += activeModule.coin_reward;
+                xp += activeModule.xp_reward;
+                unlockedBadges.push(activeModule.badge_id);
+                completedModules.push(activeModule.id);
+                localStorage.setItem('mq_badges', JSON.stringify(unlockedBadges));
+                localStorage.setItem('mq_completed_modules', JSON.stringify(completedModules));
+                updateStats(); renderBadges();
+                reward = ` You earned +${activeModule.coin_reward} coins and +${activeModule.xp_reward} XP.`;
             }
-
-            localStorage.setItem('mq_coins', coins);
-            localStorage.setItem('mq_xp', xp);
-            localStorage.setItem('mq_badges', JSON.stringify(unlockedBadges));
-
-            updateStats();
-            renderBadges();
-            alert(`🎉 Quiz Completed! Earned +${coinReward} Coins, +${xpReward} XP, and unlocked a new Badge!`);
+            document.getElementById('modules-container').innerHTML = `<div class="liquid-glass p-8 rounded-2xl space-y-5 md:col-span-2 lg:col-span-3"><h2 class="text-2xl font-black text-white">${passed ? '🎉 Quiz Passed!' : 'Keep Practicing'}</h2><p class="text-sm text-slate-300">You scored ${score} / ${activeModule.questions.length}.${reward}</p><div class="space-y-3">${activeModule.questions.map((question, index) => `<div class="p-3 rounded-xl ${answers[index] === question.answer ? 'bg-emerald-500/10' : 'bg-rose-500/10'} text-xs"><b>${index + 1}. ${answers[index] === question.answer ? 'Correct' : 'Review'}</b> <span class="text-slate-300">${question.explanation}</span></div>`).join('')}</div><button onclick="fetchModules()" class="liquid-btn-primary px-5 py-3 rounded-xl text-xs font-bold">Back to Modules</button></div>`;
         }
     </script>
 </body>
