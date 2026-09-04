@@ -3,468 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoneyQuest.AI - Financial Literacy & Skill Quest</title>
+    <title>MoneyQuest.AI - Financial Modules</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/style.css">
-</head><script>
-    (function() {
-        const savedTheme = localStorage.getItem('mq_theme') || 'dark';
-        const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
-        
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.documentElement.style.setProperty('--accent-color', savedAccent);
-        
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedAccent);
-        if (result) {
-            const r = parseInt(result[1], 16), g = parseInt(result[2], 16), b = parseInt(result[3], 16);
-            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            document.documentElement.style.setProperty('--accent-text', yiq >= 128 ? '#020617' : '#ffffff');
-        }
-    })();
-</script>
-<body class="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 overflow-x-hidden">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('mq_theme') || 'dark';
+            const savedAccent = localStorage.getItem('mq_accent') || '#38bdf8';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.documentElement.style.setProperty('--accent-color', savedAccent);
+        })();
+    </script>
+</head>
+<body class="min-h-screen flex bg-slate-950 text-slate-100">
 
     <div id="sidebar-container"></div>
 
-    <main class="flex-1 p-4 md:p-8 overflow-y-auto w-full space-y-6 max-w-7xl mx-auto">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto h-screen space-y-6 max-w-7xl mx-auto">
         
-        <!-- Header & Stats Bar -->
-        <div class="flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center border-b border-white/10 pb-4 gap-4">
+        <!-- Header Banner -->
+        <div class="flex flex-wrap justify-between items-center border-b border-white/10 pb-4 gap-4">
             <div>
-                <h1 class="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
                     🎯 Financial Literacy Modules
                 </h1>
                 <p class="text-slate-400 text-xs mt-0.5">Master bite-sized financial lessons, complete 10-question quizzes, earn XP, and unlock badges!</p>
             </div>
-
-            <!-- Gamification XP & Badges Counter -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-                <div class="liquid-glass px-3 md:px-4 py-2 rounded-xl border border-sky-400/30 flex items-center gap-2 w-full sm:w-auto">
-                    <span class="text-lg">⚡</span>
-                    <div>
-                        <span class="text-[10px] uppercase font-extrabold text-slate-400 block leading-tight">Total XP</span>
-                        <strong id="user-xp" class="text-sky-400 font-black text-sm">0 XP</strong>
-                    </div>
+            <div class="flex items-center gap-3">
+                <div class="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black text-xs flex items-center gap-1.5">
+                    <span>🪙</span> <span id="user-coins">0</span> Coins
                 </div>
-                <div class="liquid-glass px-3 md:px-4 py-2 rounded-xl border border-emerald-400/30 flex items-center gap-2 w-full sm:w-auto">
-                    <span class="text-lg">🏆</span>
-                    <div>
-                        <span class="text-[10px] uppercase font-extrabold text-slate-400 block leading-tight">Badges Unlocked</span>
-                        <strong id="unlocked-badge-count" class="text-emerald-400 font-black text-sm">0 / 7</strong>
-                    </div>
+                <div class="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 font-black text-xs flex items-center gap-1.5">
+                    <span>⚡</span> <span id="user-xp">0</span> XP
+                </div>
+                <div class="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black text-xs flex items-center gap-1.5">
+                    <span>🏆</span> <span id="user-badges-count">0 / 7</span> Badges
                 </div>
             </div>
         </div>
 
-        <!-- Badges Showcase Section -->
+        <!-- Achievements & Badges Panel -->
         <div class="liquid-glass p-5 rounded-2xl space-y-3">
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Achievements & Badges</h2>
-            <div id="badges-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                <!-- Badges populated by JS -->
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">ACHIEVEMENTS & BADGES</h2>
+            <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+                <!-- Badges render dynamically -->
             </div>
         </div>
 
-        <!-- Main Workspace (Module Cards, Lesson View, or Quiz View) -->
-        <div id="main-content-area">
-            <!-- Dynamic Grid of 7 Modules -->
-            <div id="modules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <!-- All 7 Modules Grid -->
+        <div id="modules-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Modules render dynamically -->
         </div>
 
     </main>
 
     <script src="/static/sidebar.js"></script>
     <script>
-        // Financial Literacy Curriculum Data
-        const modulesData = [
-            {
-                id: "mod-1",
-                title: "Saving & Spending Essentials",
-                icon: "🐷",
-                badge: "Savings Master",
-                description: "Master the 50/30/20 budget framework, emergency funds, and compound interest basics.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. The 50/30/20 Budgeting Rule</h3>
-                    <p class="text-slate-300 text-sm mb-4">The 50/30/20 rule is a simple budget framework. Divide your net take-home pay into three buckets: <strong>50% for Needs</strong> (rent, utilities, groceries), <strong>30% for Wants</strong> (dining out, entertainment, subscriptions), and <strong>20% for Savings & Debt Payoff</strong>.</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. Emergency Funds</h3>
-                    <p class="text-slate-300 text-sm mb-4">An emergency fund is money set aside specifically to absorb life's unexpected expenses—like emergency car repairs or sudden medical bills. Financial experts recommend keeping 3 to 6 months' worth of living expenses stored safely in a High-Yield Savings Account (HYSA).</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">3. High-Yield Savings Accounts (HYSA)</h3>
-                    <p class="text-slate-300 text-sm mb-4">Unlike traditional brick-and-mortar savings accounts that offer minimal interest (around 0.01%), HYSAs pay significantly higher interest rates on your deposits, helping your emergency fund compound and protect against inflation.</p>
-                `,
-                questions: [
-                    { q: "What percentage of net income should go toward 'Needs' under the 50/30/20 rule?", options: ["20%", "30%", "50%", "70%"], answer: 2, explanation: "The 50/30/20 rule allocates 50% to Needs, 30% to Wants, and 20% to Savings." },
-                    { q: "How many months of expenses are recommended for an emergency fund?", options: ["1 month", "3 to 6 months", "12 to 18 months", "24 months"], answer: 1, explanation: "3 to 6 months provides adequate protection against unexpected job loss or urgent repairs." },
-                    { q: "Where is the best place to keep an emergency fund?", options: ["Stock market", "Cryptocurrency", "High-Yield Savings Account", "Physical cash under mattress"], answer: 2, explanation: "An HYSA offers high liquidity, safety, and higher yield interest compared to normal accounts." },
-                    { q: "Under 50/30/20, streaming subscriptions fall under which category?", options: ["Needs", "Wants", "Savings", "Taxes"], answer: 1, explanation: "Streaming services are optional lifestyle preferences, placing them in the 'Wants' (30%) bucket." },
-                    { q: "What primary threat reduces the purchasing power of uninvested cash over time?", options: ["Deflation", "Inflation", "Dividends", "Equity"], answer: 1, explanation: "Inflation causes goods and services to cost more over time, eroding uninvested purchasing power." },
-                    { q: "What does APY stand for in banking?", options: ["Annual Payment Yield", "Annual Percentage Yield", "Automated Portfolio Yield", "Asset Protection Yearly"], answer: 1, explanation: "APY (Annual Percentage Yield) reflects the total amount of interest earned on money over a year including compounding." },
-                    { q: "Paying off a credit card balance in full every month helps you avoid:", options: ["Interest charges", "Cashback rewards", "Credit score increases", "FDIC insurance"], answer: 0, explanation: "Paying off statement balances in full avoids interest charges entirely." },
-                    { q: "Which expense is considered a strict 'Need'?", options: ["Concert ticket", "Designer shoes", "Utility bill (electricity)", "Gym membership"], answer: 2, explanation: "Electricity is necessary for basic living standards, making it a Need." },
-                    { q: "Compound interest is calculated on:", options: ["Only the principal amount", "Principal plus previously accumulated interest", "Only annual profit", "Stock dividends"], answer: 1, explanation: "Compound interest generates return on both initial principal and accumulated interest over time." },
-                    { q: "What is the main advantage of automated savings transfers?", options: ["Guarantees stock profits", "Enforces consistent saving habits effortlessly", "Eliminates income tax", "Doubles interest rates"], answer: 1, explanation: "Automated savings transfer money before you have a chance to spend it, removing human friction." }
-                ]
-            },
-            {
-                id: "mod-2",
-                title: "Credit Scores & Management",
-                icon: "💳",
-                badge: "Credit Master",
-                description: "Understand FICO score factors, credit utilization rates, and how to build top-tier credit.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. Anatomy of a FICO Score</h3>
-                    <p class="text-slate-300 text-sm mb-4">Your FICO score ranges from 300 to 850. It is calculated based on 5 key weighted factors: <strong>Payment History (35%)</strong>, <strong>Amounts Owed / Credit Utilization (30%)</strong>, <strong>Length of Credit History (15%)</strong>, <strong>New Credit (10%)</strong>, and <strong>Credit Mix (10%)</strong>.</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. Credit Utilization Ratio</h3>
-                    <p class="text-slate-300 text-sm mb-4">Credit utilization is the percentage of your available credit line currently being used. For example, if you have a $1,000 credit limit and a $300 balance, your credit utilization rate is 30%. Financial experts strongly recommend keeping this ratio below 30% (ideally under 10%) to preserve high scores.</p>
-                `,
-                questions: [
-                    { q: "Which single factor makes up the largest portion of your FICO score?", options: ["Credit Mix (10%)", "New Credit (10%)", "Amounts Owed (30%)", "Payment History (35%)"], answer: 3, explanation: "Payment History accounts for 35% of your FICO score, making on-time payments critical." },
-                    { q: "What is the recommended maximum credit utilization ratio?", options: ["30%", "50%", "75%", "100%"], answer: 0, explanation: "Keeping credit utilization below 30% prevents your credit score from taking a hit." },
-                    { q: "What is the typical range for FICO credit scores?", options: ["100 - 500", "300 - 850", "500 - 1000", "0 - 100"], answer: 1, explanation: "Standard FICO credit scores range from 300 (lowest) to 850 (perfect credit)." },
-                    { q: "If you have a $2,000 credit limit and owe $500, what is your utilization rate?", options: ["15%", "25%", "40%", "50%"], answer: 1, explanation: "($500 / $2,000) * 100 = 25% utilization rate." },
-                    { q: "How long does a late payment typically stay on your credit report?", options: ["1 year", "3 years", "7 years", "Forever"], answer: 2, explanation: "Delinquencies and late payments remain on credit reports for up to 7 years." },
-                    { q: "Which action can trigger a hard inquiry on your credit profile?", options: ["Checking your own credit score", "Applying for a new mortgage or credit card", "Paying a bill on time", "Depositing cash into savings"], answer: 1, explanation: "Lenders perform hard inquiries when evaluating formal applications for new lines of credit." },
-                    { q: "Does checking your own credit score lower your FICO score?", options: ["Yes, by 10 points", "Yes, by 5 points", "No, it is a soft inquiry", "Only if done on weekends"], answer: 2, explanation: "Checking your own score is a soft inquiry and has zero impact on your credit score." },
-                    { q: "What is a Secured Credit Card?", options: ["A card backed by a cash security deposit", "A card with no spending limits", "A crypto card", "A card with guaranteed 0% interest forever"], answer: 0, explanation: "Secured credit cards require a cash deposit that serves as collateral, making them great for building credit from scratch." },
-                    { q: "Closing an old credit card account can harm your score because it:", options: ["Increases your average account age", "Lowers your total available credit and reduces account age", "Increases income tax", "Deletes payment history"], answer: 1, explanation: "Closing cards reduces overall available credit (spiking utilization) and eventually reduces average credit history length." },
-                    { q: "What are the three major credit bureaus in the US?", options: ["Visa, Mastercard, Discover", "Equifax, Experian, TransUnion", "IRS, Treasury, FDIC", "FICO, Chase, Bank of America"], answer: 1, explanation: "Equifax, Experian, and TransUnion are the three primary national credit reporting agencies." }
-                ]
-            },
-            {
-                id: "mod-3",
-                title: "Debt Repayment Strategies",
-                icon: "🛡️",
-                badge: "Debt Crusher",
-                description: "Learn the Debt Avalanche vs. Debt Snowball methods and master interest cost reduction.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. Debt Avalanche Method</h3>
-                    <p class="text-slate-300 text-sm mb-4">The Debt Avalanche prioritizes paying off debts with the highest interest rates first while maintaining minimum payments on the rest. Mathematically, this strategy saves you the most money in total interest costs over time.</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. Debt Snowball Method</h3>
-                    <p class="text-slate-300 text-sm mb-4">The Debt Snowball prioritizes paying off the smallest debt balances first, regardless of interest rates. Closing out small debts quickly provides immediate psychological momentum and motivation.</p>
-                `,
-                questions: [
-                    { q: "Which debt repayment strategy saves the most money in interest charges?", options: ["Debt Snowball", "Debt Avalanche", "Minimum Payment Method", "Random Payment Strategy"], answer: 1, explanation: "Debt Avalanche targets high-interest debt first, mathematically minimizing total interest paid." },
-                    { q: "Which strategy focuses on paying off the smallest balances first for psychological wins?", options: ["Debt Avalanche", "Debt Snowball", "Refinancing", "Consolidation"], answer: 1, explanation: "Debt Snowball builds psychological momentum by eliminating small debt balances quickly." },
-                    { q: "What is debt consolidation?", options: ["Combining multiple debts into a single loan with one monthly payment", "Erasing debt legally without paying", "Doubling credit limits", "Investing debt in stocks"], answer: 0, explanation: "Consolidation merges multiple balances into one payment, often at a lower aggregate interest rate." },
-                    { q: "Compound interest works AGAINST you when you are:", options: ["Investing in index funds", "Holding cash in a savings account", "Carrying a credit card balance", "Earning bond coupons"], answer: 2, explanation: "When carrying debt, unpaid interest compounds exponentially on top of your balance." },
-                    { q: "What is a 0% APR Balance Transfer card used for?", options: ["Earning crypto rewards", "Moving high-interest credit card debt to a temporary 0% interest card to pay off principal faster", "Avoiding income taxes", "Getting free cash advances"], answer: 1, explanation: "Balance transfer cards give a promotional window (e.g. 12-18 months) with 0% APR to eliminate principal without added interest." },
-                    { q: "What is principal in a loan?", options: ["The extra fee charged by banks", "The original sum of money borrowed", "The annual interest rate", "The tax penalty"], answer: 1, explanation: "Principal represents the original balance borrowed before interest and fees are applied." },
-                    { q: "What happens if you only pay the minimum balance on a credit card?", options: ["Your balance is paid off in 1 year", "You avoid late fees, but incur high interest and take years to pay off principal", "Your score reaches 850 automatically", "Interest is waived"], answer: 1, explanation: "Minimum payments primarily cover interest and a tiny fraction of principal, dragging out repayment for years." },
-                    { q: "Variable interest rate loans mean:", options: ["Interest rate remains fixed forever", "Interest rates fluctuate based on market benchmark indexes", "Interest is 0% for life", "Payments are optional"], answer: 1, explanation: "Variable rates can rise or fall based on benchmark market rate movements." },
-                    { q: "What is a default on a loan?", options: ["Paying a loan early", "Failing to fulfill the legal obligations of loan repayment", "Refinancing a loan", "Applying for credit"], answer: 1, explanation: "Defaulting occurs when a borrower fails to make agreed payments over a prolonged period." },
-                    { q: "Which type of debt is generally considered 'good debt' if managed wisely?", options: ["High-interest payday loans", "Credit card cash advances", "Low-interest student loans or mortgages that build equity/earning power", "Buy Now Pay Later consumer debt"], answer: 2, explanation: "Mortgages and education loans can build long-term equity or increase career income potential." }
-                ]
-            },
-            {
-                id: "mod-4",
-                title: "Investing & Stock Market",
-                icon: "📈",
-                badge: "Market Investor",
-                description: "Demystify stocks, ETF diversification, dollar-cost averaging, and index funds.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. Stocks vs. Index Funds</h3>
-                    <p class="text-slate-300 text-sm mb-4">A <strong>Stock</strong> represents fractional ownership in a single company. An <strong>Index Fund / ETF</strong> pools money to buy hundreds or thousands of stocks simultaneously (like the S&P 500), granting broad market diversification instantly.</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. Dollar-Cost Averaging (DCA)</h3>
-                    <p class="text-slate-300 text-sm mb-4">DCA is the strategy of investing a fixed dollar amount at regular intervals (e.g., $100 every month), regardless of market ups and downs. This removes emotional market timing and lowers average entry costs over time.</p>
-                `,
-                questions: [
-                    { q: "What does buying a share of stock represent?", options: ["A loan to the government", "Partial ownership in a company", "A guaranteed cash dividend", "A risk-free asset"], answer: 1, explanation: "Stocks represent equity or fractional ownership in a publicly traded corporation." },
-                    { q: "What is an S&P 500 Index Fund?", options: ["A high-risk crypto fund", "A fund tracking the performance of 500 of the largest US public companies", "A bank savings account", "A bond issued by the treasury"], answer: 1, explanation: "The S&P 500 tracks 500 top US companies, giving investors broad stock market exposure." },
-                    { q: "What is Dollar-Cost Averaging (DCA)?", options: ["Timing the market peak to sell everything", "Investing a fixed dollar amount on a regular schedule regardless of price", "Buying only penny stocks", "Selling stocks during market crashes"], answer: 1, explanation: "DCA builds disciplined long-term investing habits by automating regular purchases." },
-                    { q: "Diversification in an investment portfolio reduces:", options: ["Potential tax returns", "Unsystematic risk (single company risk)", "Compound interest", "Inflation"], answer: 1, explanation: "Holding multiple assets prevents a single failing company from destroying your entire portfolio." },
-                    { q: "What is a dividend?", options: ["A tax penalty paid by investors", "A distribution of a portion of a company's earnings to shareholders", "A fee charged by brokers", "The cost of a stock share"], answer: 1, explanation: "Dividends are profit distributions paid directly to company stock owners." },
-                    { q: "A Bull Market refers to a market that is:", options: ["Falling by 20% or more", "Trending upwards over an extended period", "Stagnant and flat", "Closed for holidays"], answer: 1, explanation: "Bull markets represent rising asset prices and positive investor sentiment." },
-                    { q: "What is an ETF?", options: ["Electronic Tax File", "Exchange-Traded Fund traded on stock exchanges like individual stocks", "Emergency Transfer Fund", "Equity Transfer Form"], answer: 1, explanation: "ETFs are baskets of securities that trade live on public stock exchanges throughout the day." },
-                    { q: "Bond investments generally offer lower returns than stocks because they are:", options: ["Lower risk debt securities", "Illegal for retail investors", "Subject to higher inflation", "Unregulated"], answer: 0, explanation: "Bonds are loans to governments or corporations with fixed interest, offering lower risk and lower return than equities." },
-                    { q: "What is market capitalization?", options: ["Total profit of a company", "Total dollar market value of a company's outstanding shares", "Total tax paid by a firm", "Number of employees"], answer: 1, explanation: "Market Cap = (Total Shares Outstanding) × (Current Share Price)." },
-                    { q: "Historically, what is the average annual return of the S&P 500 before inflation?", options: ["2%", "5%", "Around 10%", "25%"], answer: 2, explanation: "Historically over multi-decade periods, the S&P 500 averages ~10% annual nominal return." }
-                ]
-            },
-            {
-                id: "mod-5",
-                title: "Housing & Mortgages",
-                icon: "🏠",
-                badge: "Real Estate Pro",
-                description: "Compare renting vs. owning, fixed mortgages, down payments, and equity growth.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. Renting vs. Buying</h3>
-                    <p class="text-slate-300 text-sm mb-4">Renting offers flexibility and caps your monthly cost (rent is the MAXIMUM you pay). Owning builds equity over time, but mortgage payments are the MINIMUM you pay (property tax, maintenance, and repairs add up).</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. Fixed-Rate Mortgages</h3>
-                    <p class="text-slate-300 text-sm mb-4">A 30-year fixed-rate mortgage locks in your principal and interest rate for 30 years, protecting home buyers from unexpected interest rate increases during the loan term.</p>
-                `,
-                questions: [
-                    { q: "What is home equity?", options: ["The monthly property tax", "The market value of the home minus remaining mortgage debt", "The real estate agent's commission", "The interest paid to the bank"], answer: 1, explanation: "Equity is the portion of the property you truly 'own' outright free of debt." },
-                    { q: "What is Private Mortgage Insurance (PMI)?", options: ["Insurance that pays you if property value drops", "Insurance required by lenders if your down payment is under 20%", "Homeowners insurance for fire damage", "Tax relief insurance"], answer: 1, explanation: "PMI protects the lender against default if the borrower puts down less than 20% down payment." },
-                    { q: "In a 30-year fixed-rate mortgage, what stays constant throughout the loan?", options: ["Property taxes", "Homeowners insurance premiums", "Principal & interest rate", "Utility expenses"], answer: 2, explanation: "A fixed-rate mortgage guarantees fixed principal and interest interest rates for 30 years." },
-                    { q: "What is an escrow account used for in housing?", options: ["Storing home equity", "Holding funds for property taxes and homeowners insurance", "Paying off credit card debt", "Earning stock dividends"], answer: 1, explanation: "Lenders collect monthly escrow funds to pay property taxes and insurance on your behalf." },
-                    { q: "Which cost is unique to home ownership compared to renting?", options: ["Electricity bills", "Internet fees", "Property tax and maintenance/repair costs", "Security deposits"], answer: 2, explanation: "Homeowners are directly responsible for property taxes and home maintenance expenses." },
-                    { q: "What is a mortgage pre-approval letter?", options: ["A final home deed", "A document from a lender indicating the loan amount you are tentatively qualified to borrow", "A rental lease agreement", "A tax exemption form"], answer: 1, explanation: "Pre-approval shows sellers you have verified financial backing to buy a home." },
-                    { q: "What does HOA stand for?", options: ["Home Owners Association", "Housing Organization of America", "House Option Agreement", "High Occupancy Asset"], answer: 0, explanation: "HOAs manage residential communities and charge monthly dues for common area maintenance." },
-                    { q: "What is an Adjustable-Rate Mortgage (ARM)?", options: ["A mortgage with fixed payments for 30 years", "A mortgage where interest rates can change periodically based on market indexes", "A loan with zero down payment", "A rent-to-own lease"], answer: 1, explanation: "ARMs feature initial fixed periods followed by periodic interest rate adjustments." },
-                    { q: "What is appraisal in real estate?", options: ["An estimate of home construction cost", "An unbiased professional evaluation of a property's market value", "A home inspection for pests", "A tax audit"], answer: 1, explanation: "Appraisals ensure lenders do not issue loans exceeding the true market value of a home." },
-                    { q: "How does paying down mortgage principal benefit the homeowner?", options: ["Decreases home value", "Increases home equity and net worth", "Increases interest rate", "Lowers credit score"], answer: 1, explanation: "Reducing principal directly increases the owner's net equity in the property." }
-                ]
-            },
-            {
-                id: "mod-6",
-                title: "Fraud & Security",
-                icon: "🔒",
-                badge: "Cyber Defender",
-                description: "Spot identity theft, phishing scams, two-factor authentication, and credit freezes.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. Phishing Scams</h3>
-                    <p class="text-slate-300 text-sm mb-4">Phishing attempts use fraudulent emails, SMS messages, or websites designed to mimic trusted institutions (like your bank) to trick you into revealing login credentials or Social Security numbers.</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. Credit Freezes</h3>
-                    <p class="text-slate-300 text-sm mb-4">Freezing your credit with Equifax, Experian, and TransUnion blocks unauthorized parties from opening new credit accounts in your name. Freezing your credit is free and does not impact your credit score.</p>
-                `,
-                questions: [
-                    { q: "What is phishing?", options: ["Earning cash back on purchases", "Fraudulent communication designed to trick victims into revealing sensitive personal info", "A method for calculating interest", "Freezing credit reports"], answer: 1, explanation: "Phishing uses deceptive emails or messages to steal passwords and financial data." },
-                    { q: "What does a credit freeze do?", options: ["Lowers your credit score by 50 points", "Restricts access to your credit report, preventing scammers from opening accounts in your name", "Deletes all existing debt", "Cancels credit cards"], answer: 1, explanation: "Freezing your credit prevents lenders from pulling credit reports for new fraudulent accounts." },
-                    { q: "What is 2FA (Two-Factor Authentication)?", options: ["Using two different banks", "A security layer requiring two separate forms of identification to access an account", "Having two credit cards", "Paying bills twice a month"], answer: 1, explanation: "2FA adds an extra security step (like a password + code sent to your phone)." },
-                    { q: "If a caller claims to be from your bank asking for your password, you should:", options: ["Give them your password immediately", "Hang up and call the official bank number listed on the back of your card", "Text them your SSN", "Transfer money"], answer: 1, explanation: "Legitimate financial institutions will NEVER ask for passwords or PINs over unsolicited calls." },
-                    { q: "How often can you check your credit reports for free officially?", options: ["Never", "Once every 10 years", "Weekly/Annually via AnnualCreditReport.com", "Only when applying for a loan"], answer: 2, explanation: "AnnualCreditReport.com provides free credit report access authorized by federal law." },
-                    { q: "What is identity theft?", options: ["Borrowing a friend's card with permission", "Unlawfully acquiring and using someone else's personal identifying information for gain", "Changing your legal name", "Forgetting a bank password"], answer: 1, explanation: "Identity theft involves unauthorized use of SSNs or personal data to commit fraud." },
-                    { q: "Which password is the most secure for online banking?", options: ["12345678", "Password2026", "A unique 16-character passphrase with mixed characters and numbers", "Your birth date"], answer: 2, explanation: "Long, unique passphrases with varied character types resist brute-force hacking." },
-                    { q: "Using public Wi-Fi to log into bank accounts without a VPN is risky because:", options: ["It costs extra money", "Unencrypted data transmitted over public Wi-Fi can be intercepted by hackers", "It automatically deletes your balance", "It triggers credit inquiries"], answer: 1, explanation: "Public Wi-Fi networks lack encryption protection against packet sniffing." },
-                    { q: "What should you do immediately if you lose your debit card?", options: ["Wait 30 days", "Lock or freeze the card via your banking app and notify your bank", "Close all bank accounts", "Post on social media"], answer: 1, explanation: "Instantly locking the card prevents unauthorized transactions." },
-                    { q: "Which website protocol indicator signifies an encrypted connection?", options: ["http://", "https:// with a padlock icon", "ftp://", "file://"], answer: 1, explanation: "HTTPS encrypts data exchanged between your browser and the web server." }
-                ]
-            },
-            {
-                id: "mod-7",
-                title: "Taxes & Income",
-                icon: "📜",
-                badge: "Tax Tactician",
-                description: "Demystify W-2 vs. 1099, tax brackets, standard deductions, and tax-advantaged accounts.",
-                lesson: `
-                    <h3 class="text-xl font-black text-sky-400 mb-3">1. Marginal Tax Brackets</h3>
-                    <p class="text-slate-300 text-sm mb-4">The US uses progressive tax brackets. Moving into a higher tax bracket does NOT mean all your income is taxed at the higher rate—only the income that falls within that specific bracket is taxed at the higher percentage.</p>
-                    <h3 class="text-xl font-black text-sky-400 mb-3">2. W-2 vs. 1099</h3>
-                    <p class="text-slate-300 text-sm mb-4"><strong>W-2 Employees</strong> have taxes automatically withheld from paychecks by employers. <strong>1099 Independent Contractors</strong> receive gross pay without withholding and must pay self-employment taxes directly via quarterly estimated tax payments.</p>
-                `,
-                questions: [
-                    { q: "What does a progressive income tax system mean?", options: ["Everyone pays the exact same tax percentage", "Higher income increments are taxed at progressively higher rates", "Taxes decrease as you earn more", "Only corporations pay tax"], answer: 1, explanation: "Progressive tax systems apply higher rates only to higher bands of taxable income." },
-                    { q: "Which form do traditional W-2 employees receive at year-end summarizing annual wages and taxes withheld?", options: ["Form W-2", "Form 1099-MISC", "Form 1040-EZ", "Form W-4"], answer: 0, explanation: "W-2 forms detail wages earned and taxes withheld throughout the calendar year." },
-                    { q: "What is the standard deduction?", options: ["A penalty fee charged by the IRS", "A flat dollar amount that reduces your taxable income automatically", "A tax on luxury items", "A refund check"], answer: 1, explanation: "The standard deduction lowers taxable income without requiring itemized receipt tracking." },
-                    { q: "How does a Roth IRA differ from a Traditional IRA?", options: ["Roth contributions are tax-deductible upfront", "Roth IRA contributions are made with post-tax dollars and grow 100% tax-free in retirement", "Roth IRAs are only for businesses", "Traditional IRAs never tax withdrawals"], answer: 1, explanation: "Roth IRAs offer tax-free withdrawals in retirement because contributions are made post-tax." },
-                    { q: "What is a 401(k) employer match?", options: ["A tax penalty", "Free money contributed by your employer matching a percentage of your salary contributions", "A loan from the government", "A health insurance discount"], answer: 1, explanation: "Employer matches provide 100% immediate return on matched contributions—always take full advantage!" },
-                    { q: "1099 Independent Contractors are responsible for paying:", options: ["No taxes at all", "Self-employment tax (Medicare + Social Security)", "Only state sales tax", "Property taxes"], answer: 1, explanation: "Contractors must cover both employee and employer portions of Medicare and Social Security." },
-                    { q: "What is gross income?", options: ["Income after all taxes are deducted", "Total income earned before any taxes or deductions are subtracted", "Income spent on wants", "Savings yield"], answer: 1, explanation: "Gross income is your total headline earnings prior to deductions." },
-                    { q: "What is net income?", options: ["Take-home pay remaining after taxes and deductions", "Total income before taxes", "Investment profits only", "Gross sales revenue"], answer: 0, explanation: "Net income represents your actual spendable take-home pay." },
-                    { q: "Contributions to a Traditional 401(k) reduce your:", options: ["Credit utilization", "Current year taxable income", "FICO score", "Gross income"], answer: 1, explanation: "Traditional 401(k) dollars are pre-tax, lowering taxable income in the year contributed." },
-                    { q: "When is the deadline for filing individual US federal income tax returns usually?", options: ["January 1st", "April 15th", "July 4th", "December 31st"], answer: 1, explanation: "April 15th is the standard annual federal tax return filing deadline." }
-                ]
-            }
+        let coins = parseInt(localStorage.getItem('mq_coins')) || 250;
+        let xp = parseInt(localStorage.getItem('mq_xp')) || 0;
+        let unlockedBadges = JSON.parse(localStorage.getItem('mq_badges')) || [];
+
+        const ALL_BADGES = [
+            { id: "b1", name: "Budget Boss", icon: "📊" },
+            { id: "b2", name: "Credit Master", icon: "💳" },
+            { id: "b3", name: "Market Guru", icon: "📈" },
+            { id: "b4", name: "Tax Wizard", icon: "📑" },
+            { id: "b5", name: "Crypto Expert", icon: "🪙" },
+            { id: "b6", name: "Real Estate Pro", icon: "🏠" },
+            { id: "b7", name: "Wealth Titan", icon: "👑" }
         ];
 
-        // State Management
-        let userXP = parseInt(localStorage.getItem('mq_xp'), 10) || 0;
-        let unlockedBadges = [];
-        try {
-            const savedBadges = JSON.parse(localStorage.getItem('mq_badges') || '[]');
-            unlockedBadges = Array.isArray(savedBadges) ? savedBadges : [];
-        } catch (error) {
-            localStorage.removeItem('mq_badges');
-        }
-        let activeModule = null;
-        let userAnswers = {};
-
-        document.addEventListener("DOMContentLoaded", () => {
-            updateStatsUI();
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
             renderBadges();
-            renderModulesGrid();
+            fetchModules();
         });
 
-        function updateStatsUI() {
-            document.getElementById('user-xp').innerText = `${userXP} XP`;
-            document.getElementById('unlocked-badge-count').innerText = `${unlockedBadges.length} / ${modulesData.length}`;
-            localStorage.setItem('mq_xp', userXP);
-            localStorage.setItem('mq_badges', JSON.stringify(unlockedBadges));
+        function updateStats() {
+            document.getElementById('user-coins').innerText = coins;
+            document.getElementById('user-xp').innerText = xp;
+            document.getElementById('user-badges-count').innerText = `${unlockedBadges.length} / 7`;
         }
 
         function renderBadges() {
-            const container = document.getElementById('badges-container');
-            container.innerHTML = modulesData.map(mod => {
-                const isUnlocked = unlockedBadges.includes(mod.badge);
+            const container = document.getElementById('badges-grid');
+            container.innerHTML = ALL_BADGES.map(b => {
+                const isUnlocked = unlockedBadges.includes(b.id);
                 return `
-                    <div class="p-3 rounded-xl border transition text-center ${isUnlocked ? 'bg-emerald-500/10 border-emerald-400/30 text-emerald-300' : 'bg-black/30 border-white/5 text-slate-600 opacity-60'}">
-                        <div class="text-2xl mb-1">${mod.icon}</div>
-                        <div class="text-[10px] font-black uppercase tracking-wider">${mod.badge}</div>
-                        <div class="text-[9px] mt-0.5">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
+                    <div class="p-3 rounded-xl text-center border ${isUnlocked ? 'bg-sky-500/10 border-sky-500/40 text-white' : 'bg-black/20 border-white/5 text-slate-600 opacity-60'}">
+                        <span class="text-2xl block mb-1">${b.icon}</span>
+                        <span class="text-[10px] font-bold block">${b.name}</span>
+                        <span class="text-[9px] uppercase tracking-wider block mt-0.5 ${isUnlocked ? 'text-sky-400 font-extrabold' : 'text-slate-500'}">${isUnlocked ? 'Unlocked' : 'Locked'}</span>
                     </div>
                 `;
             }).join('');
         }
 
-        function renderModulesGrid() {
-            const container = document.getElementById('main-content-area');
-            container.innerHTML = `
-                <div id="modules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    ${modulesData.map(mod => {
-                        const isUnlocked = unlockedBadges.includes(mod.badge);
-                        return `
-                            <div class="liquid-glass p-6 rounded-2xl flex flex-col justify-between space-y-4 hover:border-sky-400/40 transition group">
-                                <div class="space-y-3">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-3xl">${mod.icon}</span>
-                                        <span class="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase ${isUnlocked ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/30' : 'bg-sky-500/10 text-sky-400 border border-sky-400/20'}">
-                                            ${isUnlocked ? 'Completed' : '10 Qs Quiz'}
-                                        </span>
-                                    </div>
-                                    <h3 class="text-lg font-black text-white group-hover:text-sky-300 transition">${mod.title}</h3>
-                                    <p class="text-xs text-slate-400 leading-relaxed">${mod.description}</p>
-                                </div>
-                                <button onclick="openLesson('${mod.id}')" class="w-full liquid-btn-primary py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider">
-                                    Start Lesson & Quiz →
-                                </button>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            `;
-        }
+        async function fetchModules() {
+            const container = document.getElementById('modules-container');
+            try {
+                const res = await fetch('/api/quiz/modules');
+                const data = await res.json();
+                if (!data.success) return;
 
-        function openLesson(moduleId) {
-            activeModule = modulesData.find(m => m.id === moduleId);
-            const container = document.getElementById('main-content-area');
-
-            container.innerHTML = `
-                <div class="liquid-glass p-6 md:p-8 rounded-2xl space-y-6 max-w-4xl mx-auto">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
-                        <div class="flex items-center gap-3">
-                            <span class="text-3xl">${activeModule.icon}</span>
-                            <div>
-                                <h2 class="text-xl font-black text-white">${activeModule.title}</h2>
-                                <span class="text-xs text-sky-400 font-bold uppercase">In-Depth Reading Lesson</span>
+                container.innerHTML = data.modules.map((m, idx) => `
+                    <div class="liquid-glass p-6 rounded-2xl flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase font-extrabold text-sky-400 tracking-wider">Module 0${idx + 1}</span>
+                                <span class="text-[10px] font-bold text-slate-400">${m.questions.length} Questions</span>
                             </div>
+                            <h3 class="text-base font-bold text-white">${m.title}</h3>
+                            <p class="text-xs text-slate-400 line-clamp-3">${m.description}</p>
                         </div>
-                        <button onclick="renderModulesGrid()" class="px-3 py-1.5 rounded-lg bg-white/10 text-xs font-bold hover:bg-white/20">
-                            ← Back to Modules
-                        </button>
-                    </div>
-
-                    <div class="prose prose-invert max-w-none text-slate-200 leading-relaxed space-y-4">
-                        ${activeModule.lesson}
-                    </div>
-
-                    <div class="pt-6 border-t border-white/10 flex justify-end">
-                        <button onclick="startQuiz()" class="liquid-btn-primary px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider">
-                            Take 10-Question Quiz (+100 XP) →
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function startQuiz() {
-            userAnswers = {};
-            renderQuizView();
-        }
-
-        function renderQuizView() {
-            const container = document.getElementById('main-content-area');
-            container.innerHTML = `
-                <div class="liquid-glass p-6 md:p-8 rounded-2xl space-y-6 max-w-4xl mx-auto">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
-                        <div>
-                            <h2 class="text-xl font-black text-white">${activeModule.title} Quiz</h2>
-                            <p class="text-xs text-slate-400">Answer all 10 questions to earn 100 XP and unlock the ${activeModule.badge} badge!</p>
-                        </div>
-                        <button onclick="openLesson('${activeModule.id}')" class="px-3 py-1.5 rounded-lg bg-white/10 text-xs font-bold hover:bg-white/20">
-                            📖 Review Lesson
-                        </button>
-                    </div>
-
-                    <form id="quiz-form" class="space-y-6">
-                        ${activeModule.questions.map((q, qIndex) => `
-                            <div class="p-4 rounded-xl bg-black/30 border border-white/5 space-y-3">
-                                <p class="text-sm font-bold text-white">${qIndex + 1}. ${q.q}</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    ${q.options.map((opt, oIndex) => `
-                                        <label class="flex items-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-sky-500/10 border border-white/5 cursor-pointer text-xs font-semibold text-slate-300 transition">
-                                            <input type="radio" name="q_${qIndex}" value="${oIndex}" onchange="recordAnswer(${qIndex}, ${oIndex})" class="accent-sky-400">
-                                            <span>${opt}</span>
-                                        </label>
-                                    `).join('')}
-                                </div>
+                        <div class="pt-4 border-t border-white/10 space-y-3">
+                            <div class="text-[10px] font-bold text-slate-400 flex justify-between">
+                                <span>Reward:</span>
+                                <div><span class="text-amber-400">+${m.coin_reward} 🪙</span> | <span class="text-purple-400">+${m.xp_reward} ⚡</span></div>
                             </div>
-                        `).join('')}
-
-                        <div class="pt-4 flex justify-end">
-                            <button type="button" onclick="submitQuiz()" class="liquid-btn-primary px-8 py-3 rounded-xl text-xs font-black uppercase tracking-wider">
-                                Submit Quiz Answers
+                            <button onclick="claimModuleReward('${m.badge_id}', ${m.coin_reward}, ${m.xp_reward})" class="w-full liquid-btn-primary py-2 rounded-xl text-xs font-bold">
+                                Start Quiz & Complete
                             </button>
                         </div>
-                    </form>
-                </div>
-            `;
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<p class="text-xs text-rose-400">Failed to load modules from server.</p>`;
+            }
         }
 
-        function recordAnswer(qIndex, oIndex) {
-            userAnswers[qIndex] = oIndex;
-        }
-
-        function submitQuiz() {
-            if (Object.keys(userAnswers).length < activeModule.questions.length) {
-                alert("Please answer all 10 questions before submitting!");
-                return;
+        function claimModuleReward(badgeId, coinReward, xpReward) {
+            coins += coinReward;
+            xp += xpReward;
+            if (!unlockedBadges.includes(badgeId)) {
+                unlockedBadges.push(badgeId);
             }
 
-            let correctCount = 0;
-            const feedbackList = activeModule.questions.map((q, idx) => {
-                const userSelected = userAnswers[idx];
-                const isCorrect = userSelected === q.answer;
-                if (isCorrect) correctCount++;
+            localStorage.setItem('mq_coins', coins);
+            localStorage.setItem('mq_xp', xp);
+            localStorage.setItem('mq_badges', JSON.stringify(unlockedBadges));
 
-                return `
-                    <div class="p-4 rounded-xl border ${isCorrect ? 'bg-emerald-500/10 border-emerald-400/30' : 'bg-rose-500/10 border-rose-400/30'} space-y-2">
-                        <div class="flex justify-between text-xs font-bold">
-                            <span class="text-white">${idx + 1}. ${q.q}</span>
-                            <span class="${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
-                        </div>
-                        <p class="text-xs text-slate-300"><strong>Your Answer:</strong> ${q.options[userSelected]}</p>
-                        ${!isCorrect ? `<p class="text-xs text-emerald-400"><strong>Correct Answer:</strong> ${q.options[q.answer]}</p>` : ''}
-                        <div class="p-2.5 rounded-lg bg-black/40 text-[11px] text-slate-300 leading-relaxed border border-white/5">
-                            💡 <strong>Explanation:</strong> ${q.explanation}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const passed = correctCount >= 7; // 70% pass score
-            if (passed) {
-                userXP += 100;
-                if (!unlockedBadges.includes(activeModule.badge)) {
-                    unlockedBadges.push(activeModule.badge);
-                }
-                updateStatsUI();
-                renderBadges();
-            }
-
-            const container = document.getElementById('main-content-area');
-            container.innerHTML = `
-                <div class="liquid-glass p-6 md:p-8 rounded-2xl space-y-6 max-w-4xl mx-auto">
-                    <div class="text-center space-y-2 border-b border-white/10 pb-6">
-                        <div class="text-4xl">${passed ? '🎉' : '💪'}</div>
-                        <h2 class="text-2xl font-black text-white">${passed ? 'Quiz Passed!' : 'Keep Practicing!'}</h2>
-                        <p class="text-sm font-bold ${passed ? 'text-emerald-400' : 'text-rose-400'}">
-                            You scored ${correctCount} / 10 (${correctCount * 10}%). ${passed ? '+100 XP Earned & Badge Unlocked!' : 'Score 70% or higher to earn XP and unlock the badge.'}
-                        </p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Detailed Explanations & Review</h3>
-                        ${feedbackList}
-                    </div>
-
-                    <div class="pt-6 border-t border-white/10 flex flex-wrap justify-between gap-4">
-                        <button onclick="renderModulesGrid()" class="px-5 py-2.5 rounded-xl bg-white/10 text-xs font-bold hover:bg-white/20">
-                            ← Back to Modules
-                        </button>
-                        <button onclick="startQuiz()" class="liquid-btn-primary px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider">
-                            🔄 Retry Quiz
-                        </button>
-                    </div>
-                </div>
-            `;
+            updateStats();
+            renderBadges();
+            alert(`🎉 Quiz Completed! Earned +${coinReward} Coins, +${xpReward} XP, and unlocked a new Badge!`);
         }
     </script>
 </body>
