@@ -152,10 +152,27 @@ def fetch_quote(ticker):
     price = float(closes[-1])
     previous = float(closes[-2]) if len(closes) > 1 else price
     change = price - previous
+    info = {}
     try:
-        info = yf.Ticker(symbol).info
-    except Exception:
-        info = {}
+        summary_response = requests.get(
+            f'https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}',
+            params={'modules': 'assetProfile,price,summaryDetail,defaultKeyStatistics'},
+            headers={'User-Agent': 'Mozilla/5.0'},
+            timeout=10
+        )
+        summary_response.raise_for_status()
+        summary = (summary_response.json().get('quoteSummary', {}).get('result') or [{}])[0]
+        for section in summary.values():
+            if isinstance(section, dict):
+                info.update({key: value.get('raw', value) if isinstance(value, dict) else value for key, value in section.items()})
+    except (requests.RequestException, ValueError, KeyError):
+        pass
+
+    if not info:
+        try:
+            info = yf.Ticker(symbol).info
+        except Exception:
+            info = {}
     return {
         'success': True,
         'symbol': symbol,
@@ -168,6 +185,28 @@ def fetch_quote(ticker):
         'high_52': info.get('fiftyTwoWeekHigh', 'N/A'),
         'low_52': info.get('fiftyTwoWeekLow', 'N/A')
     }
+
+
+def yahoo_news(query='stock market'):
+    response = requests.get(
+        'https://query1.finance.yahoo.com/v1/finance/search',
+        params={'q': query, 'newsCount': 20, 'quotesCount': 0, 'lang': 'en-US', 'region': 'US'},
+        headers={'User-Agent': 'Mozilla/5.0'},
+        timeout=10
+    )
+    response.raise_for_status()
+    news = response.json().get('news', [])
+    return [
+        {
+            'title': item.get('title'),
+            'publisher': item.get('publisher', 'Yahoo Finance'),
+            'link': item.get('link', 'https://finance.yahoo.com/'),
+            'related': item.get('relatedTickers', ['MARKET'])[0] if item.get('relatedTickers') else 'MARKET',
+            'pubDate': item.get('providerPublishTime', '')
+        }
+        for item in news
+        if item.get('title') and item.get('link')
+    ]
 
 @app.route('/')
 def landing():
@@ -204,6 +243,38 @@ def store():
 @app.route('/api/quiz/modules')
 def get_modules():
     return jsonify({"success": True, "modules": MODULES})
+
+
+@app.route('/api/news')
+def get_market_news():
+    try:
+        articles = yahoo_news()
+    except (requests.RequestException, ValueError, KeyError):
+        articles = []
+
+    if not articles:
+        for symbol in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA']:
+            try:
+                items = yf.Ticker(symbol).news or []
+                for item in items[:3]:
+                    content = item.get('content', item)
+                    title = content.get('title') or item.get('title')
+                    link_data = content.get('canonicalUrl') or content.get('clickThroughUrl') or {}
+                    link = link_data.get('url') if isinstance(link_data, dict) else item.get('link')
+                    if title and link:
+                        articles.append({
+                            'title': title,
+                            'publisher': content.get('provider', {}).get('displayName', 'Yahoo Finance') if isinstance(content.get('provider'), dict) else 'Yahoo Finance',
+                            'link': link,
+                            'related': symbol,
+                            'pubDate': content.get('pubDate', '')
+                        })
+            except Exception:
+                continue
+            if len(articles) >= 12:
+                break
+
+    return jsonify({'success': True, 'news': articles[:12]})
 
 
 @app.route('/api/stock/<ticker>')
