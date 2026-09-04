@@ -61,7 +61,13 @@
     <script>
         let coins = parseInt(localStorage.getItem('mq_coins')) || 250;
         let xp = parseInt(localStorage.getItem('mq_xp')) || 0;
-        let unlockedBadges = JSON.parse(localStorage.getItem('mq_badges')) || [];
+        let unlockedBadges = [];
+        try {
+            const savedBadges = JSON.parse(localStorage.getItem('mq_badges') || '[]');
+            unlockedBadges = Array.isArray(savedBadges) ? savedBadges : [];
+        } catch (error) {
+            localStorage.removeItem('mq_badges');
+        }
 
         const ALL_BADGES = [
             { id: "b1", name: "Budget Boss", icon: "📊" },
