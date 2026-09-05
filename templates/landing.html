@@ -22,7 +22,7 @@
         }
     })();
 </script>
-<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 overflow-x-hidden">
+<body class="landing-page min-h-screen flex flex-col bg-slate-950 text-slate-100 overflow-x-hidden">
 
     <!-- Navbar -->
     <header class="w-full px-4 md:px-6 py-4 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 border-b border-white/10 relative z-20">
@@ -47,26 +47,34 @@
     <main class="flex-1 w-full px-4 md:px-6 space-y-10 md:space-y-20 py-8 md:py-10">
         
         <!-- Hero Section -->
-        <section class="text-center space-y-6 max-w-3xl mx-auto pt-4 md:pt-8">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full liquid-glass border border-sky-400/30 text-sky-300 text-xs font-bold">
-                <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
-                Interactive Paper Trading & Financial Intelligence Engine
+        <section class="landing-hero max-w-6xl mx-auto pt-4 md:pt-10">
+            <div class="landing-hero-copy space-y-6 max-w-3xl">
+                <div class="eyebrow inline-flex items-center gap-2 text-sky-300 text-xs font-bold">
+                    <span class="w-2 h-2 rounded-full bg-[var(--accent-color)] animate-pulse"></span>
+                    Interactive paper trading / financial intelligence engine
+                </div>
+                <h1 class="text-4xl md:text-7xl font-black text-white tracking-tight leading-none">
+                    Learn money by <span class="hero-highlight">moving through it.</span>
+                </h1>
+                <p class="text-slate-300 text-base md:text-lg max-w-2xl leading-relaxed">
+                    A living financial sandbox for curious people: follow markets, test decisions, build habits, and get smarter before real money is on the line.
+                </p>
+                <div class="flex flex-wrap gap-4 pt-2">
+                    <a href="/terminal" class="liquid-btn-primary px-8 py-3.5 rounded-xl text-sm font-black transition">Enter the terminal →</a>
+                    <a href="/quiz" class="liquid-btn-secondary px-8 py-3.5 rounded-xl text-sm font-black transition">Start a lesson</a>
+                </div>
             </div>
-            <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight">
-                Master the Markets with <span class="bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">Risk-Free Intelligence</span>
-            </h1>
-            <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto">
-                MoneyQuest combines real-time TradingView market feeds, AI-driven budget analytics, and intelligent financial tutoring to transform the way you build wealth.
-            </p>
-            <div class="flex flex-wrap justify-center gap-4 pt-4">
-                <a href="/terminal" class="liquid-btn-primary px-8 py-3.5 rounded-xl text-sm font-black transition">
-                    Open Trading Terminal
-                </a>
-                <a href="/budget" class="liquid-btn-secondary px-8 py-3.5 rounded-xl text-sm font-black transition">
-                    Explore Budget Planner
-                </a>
+            <div class="hero-market-panel liquid-glass rounded-2xl p-5 md:p-7" aria-label="Market overview illustration">
+                <div class="flex justify-between items-start gap-4">
+                    <div><span class="eyebrow text-slate-500 text-[10px]">Market pulse / today</span><h2 class="text-xl md:text-2xl font-black text-white mt-2">Signal over noise.</h2></div>
+                    <span class="mono-label text-[10px] text-emerald-300">+12.84%</span>
+                </div>
+                <div class="hero-chart" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="grid grid-cols-3 gap-3 pt-4 border-t border-white/10 text-xs"><div><span class="text-slate-500 block">Learning XP</span><strong class="text-white text-lg">2,480</strong></div><div><span class="text-slate-500 block">Paper capital</span><strong class="text-white text-lg">$100K</strong></div><div><span class="text-slate-500 block">Lessons</span><strong class="text-white text-lg">07</strong></div></div>
             </div>
         </section>
+
+        <div class="ticker-strip" aria-label="Platform capabilities"><span>MARKET TERMINAL</span><i></i><span>BUDGET INTELLIGENCE</span><i></i><span>AI ADVISOR</span><i></i><span>FINANCIAL LITERACY</span><i></i><span>ROADMAP LAB</span></div>
 
         <!-- Core 3 Sections -->
         <section class="space-y-6">

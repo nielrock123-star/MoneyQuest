@@ -48,6 +48,11 @@ function renderSidebar() {
 
     applyTheme(currentTheme);
     updateAccentColor(currentAccent, false);
+
+    const activePath = window.location.pathname;
+    container.querySelectorAll('nav a').forEach(link => {
+        if (link.getAttribute('href') === activePath) link.setAttribute('aria-current', 'page');
+    });
 }
 
 function toggleGlobalTheme() {
