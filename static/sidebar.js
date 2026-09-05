@@ -16,14 +16,17 @@ function renderSidebar() {
 
                 <!-- Main Navigation Links -->
                 <nav class="space-y-1 text-xs font-bold">
-                    <a href="/terminal" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">📈 Terminal</a>
-                    <a href="/budget" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">📊 Budget Planner</a>
-                    <a href="/credit" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">💳 Debt Engine</a>
-                    <a href="/news" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">📰 Market News</a>
-                    <a href="/chatbot" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🤖 AI Advisor</a>
-                    <a href="/quiz" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🎯 Financial Literacy</a>
-                    <a href="/roadmap" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🚀 Roadmap Lab</a>
-                    <a href="/store" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🛍️ MoneyQuest Store</a>
+                    <div class="nav-section-label">Explore / 01</div>
+                    <a href="/terminal" class="nav-chapter" style="color: var(--text-main)"><span>01</span><b>Terminal</b><em>↗</em></a>
+                    <a href="/budget" class="nav-chapter" style="color: var(--text-main)"><span>02</span><b>Budget Planner</b><em>↗</em></a>
+                    <a href="/credit" class="nav-chapter" style="color: var(--text-main)"><span>03</span><b>Debt Engine</b><em>↗</em></a>
+                    <a href="/news" class="nav-chapter" style="color: var(--text-main)"><span>04</span><b>Market News</b><em>↗</em></a>
+                    <div class="nav-section-label nav-section-spacer">Learn / 02</div>
+                    <a href="/chatbot" class="nav-chapter" style="color: var(--text-main)"><span>05</span><b>AI Advisor</b><em>↗</em></a>
+                    <a href="/quiz" class="nav-chapter" style="color: var(--text-main)"><span>06</span><b>Financial Literacy</b><em>↗</em></a>
+                    <a href="/roadmap" class="nav-chapter" style="color: var(--text-main)"><span>07</span><b>Roadmap Lab</b><em>↗</em></a>
+                    <div class="nav-section-label nav-section-spacer">Extras / 03</div>
+                    <a href="/store" class="nav-chapter" style="color: var(--text-main)"><span>08</span><b>MoneyQuest Store</b><em>↗</em></a>
                 </nav>
             </div>
 
