@@ -22,6 +22,7 @@ function renderSidebar() {
                     <a href="/news" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">📰 Market News</a>
                     <a href="/chatbot" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🤖 AI Advisor</a>
                     <a href="/quiz" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🎯 Financial Literacy</a>
+                    <a href="/roadmap" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🚀 Roadmap Lab</a>
                     <a href="/store" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10" style="color: var(--text-main)">🛍️ MoneyQuest Store</a>
                 </nav>
             </div>

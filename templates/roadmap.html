@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyQuest.AI - Roadmap Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="min-h-screen flex bg-slate-950 text-slate-100">
+    <div id="sidebar-container"></div>
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto min-h-screen space-y-6 max-w-7xl mx-auto">
+        <header class="border-b border-white/10 pb-5">
+            <span class="text-xs font-black uppercase tracking-widest text-emerald-400">Product Roadmap</span>
+            <h1 class="text-3xl font-black text-white mt-2">Roadmap Lab</h1>
+            <p class="text-slate-400 text-sm mt-1">Turn the planned capabilities into repeatable money habits and practice.</p>
+        </header>
+
+        <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <article class="liquid-glass p-6 rounded-2xl space-y-5">
+                <div><h2 class="text-lg font-black text-white">Savings Goals</h2><p class="text-xs text-slate-400 mt-1">Create targets and make virtual deposits.</p></div>
+                <form id="goal-form" class="space-y-3">
+                    <input id="goal-name" required maxlength="80" placeholder="Goal name, e.g. Emergency fund" class="w-full rounded-xl px-3 py-2 text-sm border">
+                    <input id="goal-target" required min="1" step="0.01" type="number" placeholder="Target amount" class="w-full rounded-xl px-3 py-2 text-sm border">
+                    <button class="liquid-btn-primary w-full rounded-xl py-2.5 text-xs font-black">Create Goal</button>
+                </form>
+                <div id="goals-list" class="space-y-3"></div>
+            </article>
+
+            <article class="liquid-glass p-6 rounded-2xl space-y-5">
+                <div><h2 class="text-lg font-black text-white">Portfolio Stress-Test</h2><p class="text-xs text-slate-400 mt-1">Model a market move against your paper holdings.</p></div>
+                <label class="text-xs font-bold text-slate-300">Scenario move (%)
+                    <input id="shock" type="number" value="-10" min="-90" max="50" step="1" class="w-full rounded-xl px-3 py-2 text-sm border mt-2">
+                </label>
+                <button onclick="runStressTest()" class="liquid-btn-primary w-full rounded-xl py-2.5 text-xs font-black">Run Stress-Test</button>
+                <div id="stress-result" class="rounded-xl bg-black/20 border border-white/5 p-4 text-sm text-slate-300">Choose a scenario to see the estimated impact.</div>
+            </article>
+
+            <article class="liquid-glass p-6 rounded-2xl space-y-5">
+                <div><h2 class="text-lg font-black text-white">Social Leaderboard</h2><p class="text-xs text-slate-400 mt-1">Compare simulated learning and portfolio progress.</p></div>
+                <div id="leaderboard" class="space-y-2"></div>
+            </article>
+        </section>
+    </main>
+    <script src="/static/sidebar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { loadGoals(); loadLeaderboard(); });
+
+        async function loadGoals() {
+            const response = await fetch('/api/goals');
+            const data = await response.json();
+            renderGoals(data.goals || []);
+        }
+
+        document.getElementById('goal-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch('/api/goals', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+                name: document.getElementById('goal-name').value,
+                target: document.getElementById('goal-target').value
+            })});
+            const data = await response.json();
+            if (!response.ok) return alert(data.message || 'Unable to create goal.');
+            event.target.reset();
+            renderGoals(data.goals);
+        });
+
+        async function deposit(goalId) {
+            const amount = prompt('Deposit amount');
+            if (amount === null) return;
+            const response = await fetch(`/api/goals/${goalId}/deposit`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({amount})});
+            const data = await response.json();
+            if (!response.ok) return alert(data.message || 'Unable to make deposit.');
+            renderGoals(data.goals);
+        }
+
+        function renderGoals(goals) {
+            const container = document.getElementById('goals-list');
+            if (!goals.length) { container.innerHTML = '<p class="text-xs text-slate-500">No goals yet.</p>'; return; }
+            container.innerHTML = goals.map(goal => {
+                const percent = Math.min(100, goal.saved / goal.target * 100);
+                return `<div class="rounded-xl border border-white/5 bg-black/20 p-3"><div class="flex justify-between gap-3 text-xs"><strong class="text-white">${escapeHtml(goal.name)}</strong><span class="text-slate-400">$${goal.saved.toFixed(2)} / $${goal.target.toFixed(2)}</span></div><div class="h-2 rounded-full bg-slate-800 mt-3 overflow-hidden"><div class="h-full bg-emerald-400" style="width:${percent}%"></div></div><button onclick="deposit(${goal.id})" class="text-[11px] font-bold text-emerald-400 mt-3">Add deposit</button></div>`;
+            }).join('');
+        }
+
+        async function runStressTest() {
+            const response = await fetch('/api/stress-test', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({shock: document.getElementById('shock').value})});
+            const data = await response.json();
+            const changeClass = data.estimated_change >= 0 ? 'text-emerald-400' : 'text-rose-400';
+            document.getElementById('stress-result').innerHTML = `<div class="space-y-2"><div>Portfolio basis: <strong class="text-white">$${data.portfolio_value.toLocaleString(undefined, {maximumFractionDigits: 2})}</strong></div><div>Estimated move: <strong class="${changeClass}">${data.estimated_change >= 0 ? '+' : ''}$${data.estimated_change.toLocaleString(undefined, {maximumFractionDigits: 2})}</strong></div><div class="text-xs text-slate-500">Based on a ${data.shock}% move across invested holdings. Cash is not shocked.</div></div>`;
+        }
+
+        async function loadLeaderboard() {
+            const response = await fetch('/api/leaderboard');
+            const data = await response.json();
+            document.getElementById('leaderboard').innerHTML = data.leaders.map(leader => `<div class="flex items-center justify-between rounded-xl border border-white/5 bg-black/20 px-3 py-3"><div class="flex items-center gap-3"><span class="text-xs font-black text-sky-400">#${leader.rank}</span><span class="text-xs font-bold text-white">${escapeHtml(leader.name)}</span></div><span class="text-xs text-emerald-400 font-bold">${leader.score} XP</span></div>`).join('');
+        }
+
+        function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character])); }
+    </script>
+</body>
+</html>

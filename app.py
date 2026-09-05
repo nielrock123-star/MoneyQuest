@@ -79,6 +79,8 @@ PORTFOLIO = {
     "holdings": {}
 }
 
+SAVINGS_GOALS = []
+
 LESSONS = [
     "Separate needs, wants, and savings. The 50/30/20 framework assigns about 50% of take-home pay to needs, 30% to wants, and 20% to savings or debt payoff. Build an emergency fund covering three to six months of essential expenses.",
     "Credit scores are influenced most by payment history and credit utilization. Pay on time, keep balances well below your limits, and avoid opening several new accounts at once.",
@@ -272,9 +274,80 @@ def quiz():
 def store():
     return render_template('store.html')
 
+@app.route('/roadmap')
+def roadmap():
+    return render_template('roadmap.html')
+
 @app.route('/api/quiz/modules')
 def get_modules():
     return jsonify({"success": True, "modules": MODULES})
+
+
+@app.route('/api/goals', methods=['GET', 'POST'])
+def savings_goals():
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        name = str(data.get('name', '')).strip()
+        try:
+            target = float(data.get('target', 0))
+        except (TypeError, ValueError):
+            target = 0
+        if not name or target <= 0:
+            return jsonify({'success': False, 'message': 'Enter a goal name and a target greater than zero.'}), 400
+        goal = {'id': len(SAVINGS_GOALS) + 1, 'name': name[:80], 'target': target, 'saved': 0.0}
+        SAVINGS_GOALS.append(goal)
+    return jsonify({'success': True, 'goals': SAVINGS_GOALS})
+
+
+@app.route('/api/goals/<int:goal_id>/deposit', methods=['POST'])
+def deposit_to_goal(goal_id):
+    goal = next((item for item in SAVINGS_GOALS if item['id'] == goal_id), None)
+    if not goal:
+        return jsonify({'success': False, 'message': 'Savings goal not found.'}), 404
+    data = request.get_json(silent=True) or {}
+    try:
+        amount = float(data.get('amount', 0))
+    except (TypeError, ValueError):
+        amount = 0
+    if amount <= 0:
+        return jsonify({'success': False, 'message': 'Enter a deposit greater than zero.'}), 400
+    goal['saved'] = min(goal['target'], goal['saved'] + amount)
+    return jsonify({'success': True, 'goals': SAVINGS_GOALS})
+
+
+@app.route('/api/stress-test', methods=['POST'])
+def stress_test():
+    data = request.get_json(silent=True) or {}
+    try:
+        shock = float(data.get('shock', -10))
+    except (TypeError, ValueError):
+        shock = -10
+    shock = max(-90, min(50, shock))
+    holdings = []
+    total_value = 0.0
+    for symbol, holding in PORTFOLIO['holdings'].items():
+        value = holding['shares'] * holding['avg_price']
+        total_value += value
+        holdings.append({'symbol': symbol, 'value': value, 'impact': value * shock / 100})
+    return jsonify({
+        'success': True,
+        'shock': shock,
+        'portfolio_value': PORTFOLIO['cash'] + total_value,
+        'estimated_change': total_value * shock / 100,
+        'holdings': holdings
+    })
+
+
+@app.route('/api/leaderboard')
+def leaderboard():
+    invested = sum(item['shares'] * item['avg_price'] for item in PORTFOLIO['holdings'].values())
+    current_value = PORTFOLIO['cash'] + invested
+    return jsonify({'success': True, 'leaders': [
+        {'rank': 1, 'name': 'Market Maven', 'score': 1840, 'return': 18.4},
+        {'rank': 2, 'name': 'Index Explorer', 'score': 1510, 'return': 12.7},
+        {'rank': 3, 'name': 'MoneyQuest Learner', 'score': round(current_value / 1000), 'return': round((current_value - 100000) / 1000, 2)},
+        {'rank': 4, 'name': 'Long-Term Thinker', 'score': 980, 'return': 7.8}
+    ]})
 
 
 @app.route('/api/news')
