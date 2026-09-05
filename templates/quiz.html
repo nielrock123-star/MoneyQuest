@@ -69,10 +69,17 @@
         }
 
         async function fetchModules() {
-            const response = await fetch('/api/quiz/modules');
-            const data = await response.json();
-            if (!data.success) throw new Error(data.message || 'Unable to load modules');
-            renderModules(data.modules);
+            const container = document.getElementById('modules-container');
+            try {
+                const response = await fetch('/api/quiz/modules');
+                const data = await response.json();
+                if (!response.ok || !data.success || !Array.isArray(data.modules)) {
+                    throw new Error(data.message || 'Unable to load modules');
+                }
+                renderModules(data.modules);
+            } catch (error) {
+                container.innerHTML = `<div class="liquid-glass p-8 rounded-2xl text-center md:col-span-2 lg:col-span-3"><h2 class="text-lg font-black text-white">Modules unavailable</h2><p class="text-sm text-slate-400 mt-2">${error.message}</p><button onclick="fetchModules()" class="liquid-btn-primary px-5 py-3 rounded-xl text-xs font-bold mt-5">Retry</button></div>`;
+            }
         }
 
         function renderModules(modules) {

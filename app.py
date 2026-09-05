@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import os
 import re
+import time
 import requests
 import yfinance as yf
 
@@ -112,14 +113,17 @@ def fetch_quote(ticker):
     if not re.fullmatch(r'[A-Z0-9^=.-]{1,15}', symbol):
         raise ValueError('Enter a valid ticker symbol.')
 
+    metadata = {}
     try:
         response = requests.get(
             f'https://query1.finance.yahoo.com/v8/finance/chart/{symbol}',
             params={'range': '5d', 'interval': '1d', 'events': 'history'},
+            headers={'User-Agent': 'Mozilla/5.0'},
             timeout=10
         )
         response.raise_for_status()
         result = (response.json().get('chart', {}).get('result') or [None])[0]
+        metadata = result.get('meta', {}) if result else {}
         closes = [] if not result else [
             value for value in result.get('indicators', {}).get('quote', [{}])[0].get('close', [])
             if value is not None
@@ -149,8 +153,12 @@ def fetch_quote(ticker):
     if not closes:
         raise ValueError(f'No quote data found for {symbol}')
 
-    price = float(closes[-1])
-    previous = float(closes[-2]) if len(closes) > 1 else price
+    price = float(metadata.get('regularMarketPrice') or closes[-1])
+    previous = float(
+        metadata.get('previousClose')
+        or metadata.get('chartPreviousClose')
+        or (closes[-2] if len(closes) > 1 else price)
+    )
     change = price - previous
     info = {}
     try:
@@ -173,6 +181,30 @@ def fetch_quote(ticker):
             info = yf.Ticker(symbol).info
         except Exception:
             info = {}
+
+    if not info.get('marketCap') or not info.get('trailingPE'):
+        try:
+            fundamentals_response = requests.get(
+                f'https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/{symbol}',
+                params={
+                    'type': 'quarterlyMarketCap,quarterlyPeRatio',
+                    'period1': 0,
+                    'period2': int(time.time())
+                },
+                headers={'User-Agent': 'Mozilla/5.0'},
+                timeout=10
+            )
+            fundamentals_response.raise_for_status()
+            for series in fundamentals_response.json().get('timeseries', {}).get('result', []):
+                for key in ('quarterlyMarketCap', 'quarterlyPeRatio'):
+                    values = series.get(key) or []
+                    if values and values[-1].get('reportedValue', {}).get('raw') is not None:
+                        if key == 'quarterlyMarketCap' and not info.get('marketCap'):
+                            info['marketCap'] = values[-1]['reportedValue']['raw']
+                        if key == 'quarterlyPeRatio' and not info.get('trailingPE'):
+                            info['trailingPE'] = values[-1]['reportedValue']['raw']
+        except (requests.RequestException, ValueError, KeyError, TypeError):
+            pass
     return {
         'success': True,
         'symbol': symbol,
@@ -182,8 +214,8 @@ def fetch_quote(ticker):
         'percent_change': (change / previous * 100) if previous else 0.0,
         'market_cap': info.get('marketCap', 'N/A'),
         'pe_ratio': info.get('trailingPE', 'N/A'),
-        'high_52': info.get('fiftyTwoWeekHigh', 'N/A'),
-        'low_52': info.get('fiftyTwoWeekLow', 'N/A')
+        'high_52': info.get('fiftyTwoWeekHigh') or metadata.get('fiftyTwoWeekHigh', 'N/A'),
+        'low_52': info.get('fiftyTwoWeekLow') or metadata.get('fiftyTwoWeekLow', 'N/A')
     }
 
 

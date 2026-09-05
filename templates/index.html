@@ -243,9 +243,14 @@
 
                     calculateEstimatedTotal();
                     embedTradingViewChart(data.symbol);
+                } else {
+                    throw new Error(data.message || 'Unable to load quote data');
                 }
             } catch (err) {
                 console.error("Error loading stock data:", err);
+                document.getElementById('stock-name').innerText = 'Quote unavailable';
+                document.getElementById('stock-change').innerText = err.message;
+                document.getElementById('stock-change').className = 'text-xs font-bold text-rose-400';
             }
         }
 
