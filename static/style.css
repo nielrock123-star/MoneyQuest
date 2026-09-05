@@ -47,6 +47,21 @@ body::before {
     z-index: -1;
 }
 
+.landing-page::after {
+    content: '';
+    position: fixed;
+    width: 28rem;
+    height: 28rem;
+    left: calc(var(--pointer-x, 50%) - 14rem);
+    top: calc(var(--pointer-y, 20%) - 14rem);
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(119, 200, 255, 0.08), transparent 68%);
+    mix-blend-mode: screen;
+    z-index: -1;
+    transition: left 0.45s ease-out, top 0.45s ease-out;
+}
+
 h1, h2, h3, h4, button, a { font-family: var(--display-font); }
 
 main { animation: page-enter 0.7s cubic-bezier(.2,.8,.2,1) both; }
@@ -192,8 +207,10 @@ input:focus, select:focus, textarea:focus {
 .hero-chart span:nth-child(10) { height: 84%; animation-delay: .5s; }
 .hero-chart span:nth-child(11) { height: 79%; animation-delay: .55s; }
 .hero-chart span:nth-child(12) { height: 96%; background: linear-gradient(to top, rgba(201,242,105,.5), var(--accent-color)); animation-delay: .6s; }
+.hero-chart span:nth-child(12) { animation: chart-rise 1s cubic-bezier(.2,.8,.2,1) .6s both, signal-pulse 3.5s ease-in-out 1.8s infinite; }
 
 @keyframes chart-rise { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes signal-pulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.45); box-shadow: 0 0 18px rgba(201, 242, 105, 0.35); } }
 
 .ticker-strip {
     display: flex;
@@ -209,10 +226,20 @@ input:focus, select:focus, textarea:focus {
     white-space: nowrap;
 }
 
+.ticker-track { display: inline-flex; align-items: center; gap: 1.5rem; min-width: max-content; animation: ticker-drift 26s linear infinite; }
+@keyframes ticker-drift { from { transform: translateX(0); } to { transform: translateX(-18%); } }
+
 .ticker-strip i { width: 5px; height: 5px; background: var(--accent-color); border-radius: 50%; box-shadow: 0 0 12px var(--accent-color); }
 
 .landing-page .liquid-glass { border-radius: 0.9rem !important; }
 .landing-page .liquid-glass p { color: #aab7c2; }
+.landing-page main > section:not(.landing-hero), .landing-page footer { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+.landing-page main > section.reveal-visible, .landing-page footer.reveal-visible { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.001ms !important; }
+    .landing-page main > section:not(.landing-hero), .landing-page footer { opacity: 1; transform: none; }
+}
 
 .accent-text {
     color: var(--accent-color) !important;

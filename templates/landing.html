@@ -74,7 +74,7 @@
             </div>
         </section>
 
-        <div class="ticker-strip" aria-label="Platform capabilities"><span>MARKET TERMINAL</span><i></i><span>BUDGET INTELLIGENCE</span><i></i><span>AI ADVISOR</span><i></i><span>FINANCIAL LITERACY</span><i></i><span>ROADMAP LAB</span></div>
+        <div class="ticker-strip" aria-label="Platform capabilities"><div class="ticker-track"><span>MARKET TERMINAL</span><i></i><span>BUDGET INTELLIGENCE</span><i></i><span>AI ADVISOR</span><i></i><span>FINANCIAL LITERACY</span><i></i><span>ROADMAP LAB</span><i></i><span>MARKET TERMINAL</span><i></i><span>BUDGET INTELLIGENCE</span><i></i><span>AI ADVISOR</span></div></div>
 
         <!-- Core 3 Sections -->
         <section class="space-y-6">
@@ -257,6 +257,20 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        const landingPage = document.querySelector('.landing-page');
+        const revealItems = document.querySelectorAll('.landing-page main > section:not(.landing-hero), .landing-page footer');
+        const revealObserver = new IntersectionObserver((entries) => entries.forEach(entry => {
+            if (entry.isIntersecting) revealObserver.observe(entry.target), entry.target.classList.add('reveal-visible');
+        }), { threshold: 0.12 });
+        revealItems.forEach(item => revealObserver.observe(item));
+
+        landingPage.addEventListener('pointermove', event => {
+            landingPage.style.setProperty('--pointer-x', `${event.clientX}px`);
+            landingPage.style.setProperty('--pointer-y', `${event.clientY}px`);
+        }, { passive: true });
+    </script>
 
 </body>
 </html>
